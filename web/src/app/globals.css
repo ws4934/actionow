@@ -1,0 +1,355 @@
+@import "tailwindcss";
+@import "@heroui/styles/css";
+@plugin "@tailwindcss/typography";
+@import "katex/dist/katex.min.css";
+@import "highlight.js/styles/github-dark-dimmed.css";
+
+/* Ensure Tailwind scans all source files */
+@source "../components/**/*.tsx";
+@source "./**/*.tsx";
+
+/*
+ * HeroUI Theme Customization
+ * Add this to your global.css after importing @heroui/styles
+ * Only includes base variables from variables.css
+ * @see https://v3.heroui.com/docs/react/getting-started/theming
+ */
+
+:root,
+.light,
+.default,
+[data-theme="light"],
+[data-theme="default"] {
+  /* Theme Colors (Light Mode) */
+  --accent: oklch(88.68% 0.1822 95.33);
+  --accent-foreground: oklch(15% 0.0300 95.33);
+  --background: oklch(97.02% 0.0000 95.33);
+  --border: oklch(90.00% 0.0000 95.33);
+  --danger: oklch(65.32% 0.2328 6.72);
+  --danger-foreground: oklch(99.11% 0 0);
+  --default: oklch(94.00% 0.0000 95.33);
+  --default-foreground: oklch(21.03% 0.0059 95.33);
+  --field-background: oklch(100.00% 0.0000 95.33);
+  --field-foreground: oklch(21.03% 0.0000 95.33);
+  --field-placeholder: oklch(55.17% 0.0000 95.33);
+  --focus: oklch(88.68% 0.1822 95.33);
+  --foreground: oklch(21.03% 0.0000 95.33);
+  --muted: oklch(55.17% 0.0000 95.33);
+  --overlay: oklch(100.00% 0.0000 95.33);
+  --overlay-foreground: oklch(21.03% 0.0000 95.33);
+  --scrollbar: oklch(87.10% 0.0000 95.33);
+  --segment: oklch(100.00% 0.0000 95.33);
+  --segment-foreground: oklch(21.03% 0.0000 95.33);
+  --separator: oklch(92.00% 0.0000 95.33);
+  --success: oklch(73.29% 0.1935 131.79);
+  --success-foreground: oklch(21.03% 0.0059 131.79);
+  --surface: oklch(100.00% 0.0000 95.33);
+  --surface-foreground: oklch(21.03% 0.0000 95.33);
+  --surface-secondary: oklch(95.24% 0.0000 95.33);
+  --surface-secondary-foreground: oklch(21.03% 0.0000 95.33);
+  --surface-tertiary: oklch(93.73% 0.0000 95.33);
+  --surface-tertiary-foreground: oklch(21.03% 0.0000 95.33);
+  --warning: oklch(78.19% 0.1585 53.31);
+  --warning-foreground: oklch(21.03% 0.0059 53.31);
+
+  /* Border Radius */
+  --radius: 0.25rem;
+  --field-radius: 0.5rem;
+
+  /* Font Family */
+  /* Make sure to load Inter font in your app */
+  --font-sans: var(--font-inter);
+}
+
+.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+  /* Theme Colors (Dark Mode) */
+  --accent: oklch(88.68% 0.1822 95.33);
+  --accent-foreground: oklch(15% 0.0300 95.33);
+  --background: oklch(12.00% 0.0000 95.33);
+  --border: oklch(28.00% 0.0000 95.33);
+  --danger: oklch(59.40% 0.1967 5.61);
+  --danger-foreground: oklch(99.11% 0 0);
+  --default: oklch(27.40% 0.0000 95.33);
+  --default-foreground: oklch(99.11% 0 0);
+  --field-background: oklch(21.03% 0.0000 95.33);
+  --field-foreground: oklch(99.11% 0.0000 95.33);
+  --field-placeholder: oklch(70.50% 0.0000 95.33);
+  --focus: oklch(88.68% 0.1822 95.33);
+  --foreground: oklch(99.11% 0.0000 95.33);
+  --muted: oklch(70.50% 0.0000 95.33);
+  --overlay: oklch(21.03% 0.0000 95.33);
+  --overlay-foreground: oklch(99.11% 0.0000 95.33);
+  --scrollbar: oklch(70.50% 0.0000 95.33);
+  --segment: oklch(39.64% 0.0000 95.33);
+  --segment-foreground: oklch(99.11% 0.0000 95.33);
+  --separator: oklch(25.00% 0.0000 95.33);
+  --success: oklch(73.29% 0.1935 131.79);
+  --success-foreground: oklch(21.03% 0.0059 131.79);
+  --surface: oklch(21.03% 0.0000 95.33);
+  --surface-foreground: oklch(99.11% 0.0000 95.33);
+  --surface-secondary: oklch(25.70% 0.0000 95.33);
+  --surface-secondary-foreground: oklch(99.11% 0.0000 95.33);
+  --surface-tertiary: oklch(27.21% 0.0000 95.33);
+  --surface-tertiary-foreground: oklch(99.11% 0.0000 95.33);
+  --warning: oklch(82.03% 0.1388 57.32);
+  --warning-foreground: oklch(21.03% 0.0059 57.32);
+}
+
+/* Monitor Background */
+.monitor-vignette {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(0, 0, 0, 0.15) 80%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+}
+
+.dark .monitor-vignette {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(0, 0, 0, 0.25) 80%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}
+
+.monitor-rec-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: oklch(65.32% 0.2328 6.72);
+  animation: monitor-pulse 2s ease-in-out infinite;
+}
+
+@keyframes monitor-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+/* Background Ripple Effect */
+.bre-cell {
+  border-right: 1px solid oklch(50% 0 0 / 0.08);
+  border-bottom: 1px solid oklch(50% 0 0 / 0.08);
+  transition: background-color 400ms ease-out;
+}
+
+.dark .bre-cell {
+  border-right-color: oklch(80% 0 0 / 0.06);
+  border-bottom-color: oklch(80% 0 0 / 0.06);
+}
+
+/* Utility: hide scrollbar while preserving scroll functionality */
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Landing Page: Glass Text Effect — frosted fill clipped to text shape */
+.glass-text {
+  -webkit-text-stroke: 2px oklch(30% 0 0 / 0.25);
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(120deg, oklch(30% 0 0 / 0.18) 0%, oklch(30% 0 0 / 0.06) 50%, oklch(30% 0 0 / 0.14) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.dark .glass-text {
+  -webkit-text-stroke: 1.5px oklch(100% 0 0 / 0.2);
+  background: linear-gradient(120deg, oklch(100% 0 0 / 0.14) 0%, oklch(100% 0 0 / 0.04) 50%, oklch(100% 0 0 / 0.12) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+/* ACTIONOW brand line — foreground fill + visible stroke */
+.hero-brand {
+  color: var(--foreground);
+  -webkit-text-stroke: 2px oklch(30% 0 0 / 0.25);
+}
+.hero-brand-n {
+  color: var(--accent);
+  -webkit-text-stroke: 2px oklch(30% 0 0 / 0.25);
+}
+
+/* Landing Page: Subtle Grid Background */
+.grid-subtle {
+  background-image: linear-gradient(to right, oklch(50% 0 0 / 0.04) 1px, transparent 1px),
+                    linear-gradient(to bottom, oklch(50% 0 0 / 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.dark .grid-subtle {
+  background-image: linear-gradient(to right, oklch(100% 0 0 / 0.03) 1px, transparent 1px),
+                    linear-gradient(to bottom, oklch(100% 0 0 / 0.03) 1px, transparent 1px);
+}
+
+/* Landing Page: Marquee Animation */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Skeleton shimmer for loading cards */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Toast: auto-width with max-width instead of fixed width */
+@media (min-width: 640px) {
+  .toast {
+    left: auto;
+    width: max-content;
+    min-width: 16rem;
+    max-width: var(--toast-width, 460px);
+  }
+}
+
+/* Onboarding Step Transition */
+@keyframes onboarding-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.onboarding-step-enter {
+  animation: onboarding-fade-in 0.3s ease-out;
+}
+
+/* ── Markdown Chat Renderer ─────────────────────────────────────────────────
+ * Responsive typography for react-markdown inside chat bubbles.
+ * Three tiers: mobile (default) → sm (≥640px) → lg (≥1024px)
+ * Works on top of Tailwind Typography's prose color tokens.
+ * ─────────────────────────────────────────────────────────────────────────── */
+.markdown-chat {
+  font-size: 0.875rem;   /* 14px */
+  line-height: 1.65;
+
+  /* ── Remove extra whitespace at edges of bubble ── */
+  & > :first-child { margin-top: 0 !important; }
+  & > :last-child  { margin-bottom: 0 !important; }
+
+  /* ── Paragraphs ── */
+  & p { margin: 0.125rem 0; }
+
+  /* ── Headings ── */
+  & h1 { font-size: 0.9375rem; font-weight: 700; margin: 0.625rem 0 0.25rem; line-height: 1.3; }
+  & h2 { font-size: 0.875rem;  font-weight: 600; margin: 0.5rem   0 0.25rem; line-height: 1.3; }
+  & h3 { font-size: 0.875rem;  font-weight: 600; margin: 0.375rem 0 0.125rem; }
+  & h4,
+  & h5,
+  & h6 { font-size: 0.875rem;  font-weight: 500; margin: 0.25rem  0 0; }
+
+  /* ── Lists ── */
+  & ul,
+  & ol   { margin: 0.25rem 0; padding-left: 1.25rem; }
+  & li   { margin: 0.125rem 0; }
+  & li > ul,
+  & li > ol { margin: 0.125rem 0; }
+
+  /* ── Blockquote ── */
+  & blockquote {
+    margin: 0.375rem 0;
+    padding: 0.125rem 0 0.125rem 0.625rem;
+    border-left: 2px solid var(--border);
+    color: var(--muted);
+    font-style: normal;
+  }
+  & blockquote > :first-child { margin-top: 0; }
+  & blockquote > :last-child  { margin-bottom: 0; }
+
+  /* ── Horizontal rule ── */
+  & hr { margin: 0.5rem 0; border-color: color-mix(in oklch, var(--border) 40%, transparent); }
+
+  /* ── Inline code ── */
+  & :not(pre) > code {
+    font-size: 0.8125rem;  /* 13px */
+    padding: 0.1em 0.35em;
+    border-radius: 0.25rem;
+    background: color-mix(in oklch, var(--muted) 12%, transparent);
+    font-weight: 400;
+  }
+
+  /* ── Table ── */
+  & table {
+    margin: 0.5rem 0;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;  /* 13px */
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  & th {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    text-align: left;
+    white-space: nowrap;
+  }
+  & td {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border);
+  }
+
+  /* ── Images ── */
+  & img {
+    max-height: 14rem;
+    max-width: 100%;
+    border-radius: 0.5rem;
+    object-fit: contain;
+    margin: 0.375rem 0;
+  }
+
+  /* ── sm: tablet / wide phone ── */
+  @media (min-width: 640px) {
+    & p  { margin: 0.25rem 0; }
+
+    & h1 { font-size: 1rem;      margin: 0.875rem 0 0.375rem; }
+    & h2 { font-size: 0.9375rem; margin: 0.75rem  0 0.25rem; }
+    & h3 {                       margin: 0.5rem   0 0.125rem; }
+
+    & ul,
+    & ol { margin: 0.375rem 0; }
+    & li { margin: 0.1875rem 0; }
+
+    & blockquote { padding-left: 0.75rem; margin: 0.5rem 0; }
+
+    & img { max-height: 16rem; margin: 0.5rem 0; }
+  }
+
+  /* ── lg: desktop ── */
+  @media (min-width: 1024px) {
+    line-height: 1.7;
+
+    & p  { margin: 0.375rem 0; }
+
+    & h1 { font-size: 1.0625rem; margin: 1rem   0 0.5rem; }
+    & h2 { font-size: 1rem;      margin: 0.875rem 0 0.375rem; }
+    & h3 { font-size: 0.9375rem; margin: 0.625rem 0 0.25rem; }
+    & h4,
+    & h5,
+    & h6 {                       margin: 0.375rem 0 0.125rem; }
+
+    & ul,
+    & ol   { margin: 0.5rem 0; padding-left: 1.5rem; }
+    & li   { margin: 0.25rem 0; }
+
+    & blockquote { padding-left: 0.875rem; margin: 0.625rem 0; }
+
+    & img { max-height: 20rem; margin: 0.625rem 0; }
+  }
+}

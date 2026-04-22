@@ -1,0 +1,186 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: actionow-canvas
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            actionow-project:
+              - uri: ${PROJECT_SERVICE_URL:http://actionow-project:8084}
+            actionow-user:
+              - uri: ${USER_SERVICE_URL:http://actionow-user:8081}
+            actionow-workspace:
+              - uri: ${WORKSPACE_SERVICE_URL:http://actionow-workspace:8082}
+
+  # 数据源配置
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:actionow}?currentSchema=public&stringtype=unspecified
+    username: ${DB_USER:actionow}
+    password: ${DB_PASSWORD:actionow123}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      pool-name: ActionowCanvasHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  # Redis 配置
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+
+  # RabbitMQ 配置
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    ssl:
+      enabled: ${RABBITMQ_SSL_ENABLED:false}
+    # 消费者限流配置
+    listener:
+      simple:
+        # 预取数量，限制未确认消息数
+        prefetch: 10
+        # 初始并发消费者数
+        concurrency: 2
+        # 最大并发消费者数
+        max-concurrency: 5
+        # 确认模式: manual 手动确认
+        acknowledge-mode: manual
+        # 重试配置
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          max-interval: 10000ms
+          multiplier: 2.0
+          max-attempts: 3
+
+# MyBatis Plus 配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: assign_uuid
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+# Feign 配置
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 5000
+        read-timeout: 30000
+        logger-level: basic
+  circuitbreaker:
+    enabled: true
+
+# Resilience4j 断路器配置
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        # 滑动窗口类型: COUNT_BASED 或 TIME_BASED
+        sliding-window-type: COUNT_BASED
+        # 滑动窗口大小
+        sliding-window-size: 10
+        # 最小调用次数（计算失败率之前）
+        minimum-number-of-calls: 5
+        # 失败率阈值（百分比）
+        failure-rate-threshold: 50
+        # 半开状态允许的调用数
+        permitted-number-of-calls-in-half-open-state: 3
+        # 开路状态持续时间（秒）
+        wait-duration-in-open-state: 10s
+        # 记录为失败的异常
+        record-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - feign.FeignException
+        # 忽略的异常
+        ignore-exceptions:
+          - com.actionow.common.core.exception.BusinessException
+    instances:
+      # Project 服务断路器
+      canvasProjectFeignClient:
+        base-config: default
+        failure-rate-threshold: 60
+        wait-duration-in-open-state: 15s
+  # 超时配置
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 30s
+    instances:
+      canvasProjectFeignClient:
+        timeout-duration: 30s
+  # 重试配置
+  retry:
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 500ms
+        retry-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+    instances:
+      canvasProjectFeignClient:
+        max-attempts: 3
+        wait-duration: 1s
+
+# 内部服务认证（HMAC签名）
+actionow:
+  internal:
+    auth-secret: ${INTERNAL_AUTH_SECRET:actionow-dev-internal-secret-key-32chars}
+    signature-max-age-seconds: 300
+
+# 日志配置
+logging:
+  level:
+    com.actionow: DEBUG
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Canvas 服务配置
+canvas:
+  sync:
+    # 同步重试次数
+    max-retry-attempts: 3
+    # 重试延迟（毫秒）
+    retry-delay-ms: 50
+  layout:
+    # 网格布局参数
+    node-width: 200
+    node-height: 150
+    gap-x: 50
+    gap-y: 50
+    columns: 4
+  startup-compensation:
+    # 启动时数据补偿（用于恢复因宕机丢失的MQ消息）
+    enabled: false
+    tenant-schema: ""

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欢迎进组 - 开拍 ActioNow</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans SC', sans-serif;
+            background-color: #0B0B0B;
+            margin: 0;
+            padding: 24px;
+            color: #F5F5F5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #1A1A1A;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #333333;
+        }
+        /* -- Header -- */
+        .header {
+            background-color: #0B0B0B;
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 2px solid #FFD700;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            margin: 0 0 8px 0;
+        }
+        .logo-actio { color: #F5F5F5; }
+        .logo-n { color: #FFD700; font-style: italic; }
+        .logo-ow { color: #F5F5F5; }
+        .header-slogan {
+            font-size: 14px;
+            color: #FFD700;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+        .header-sub {
+            font-size: 12px;
+            color: #999999;
+            margin-top: 4px;
+        }
+        /* -- Content -- */
+        .content {
+            padding: 40px 30px;
+        }
+        .content p {
+            color: #CCCCCC;
+            font-size: 14px;
+            line-height: 1.8;
+            margin: 0 0 16px 0;
+        }
+        .scene-label {
+            display: inline-block;
+            background-color: #FFD700;
+            color: #0B0B0B;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 2px;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+        .welcome-name {
+            color: #FFD700;
+            font-weight: 700;
+        }
+        /* -- 功能列表 -- */
+        .feature-list {
+            margin: 28px 0;
+            padding: 0;
+        }
+        .feature-item {
+            display: table;
+            width: 100%;
+            margin-bottom: 14px;
+        }
+        .feature-icon {
+            display: table-cell;
+            width: 32px;
+            vertical-align: top;
+            padding-top: 2px;
+        }
+        .feature-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #FFD700;
+            border-radius: 1px;
+            transform: rotate(45deg);
+        }
+        .feature-text {
+            display: table-cell;
+            color: #CCCCCC;
+            font-size: 14px;
+            line-height: 1.6;
+            vertical-align: top;
+        }
+        .feature-text strong {
+            color: #F5F5F5;
+        }
+        /* -- CTA 按钮 -- */
+        .action-wrap {
+            text-align: center;
+            margin: 32px 0 8px 0;
+        }
+        .btn-action {
+            display: inline-block;
+            background-color: #FFD700;
+            color: #0B0B0B !important;
+            text-decoration: none;
+            padding: 14px 48px;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            border-radius: 2px;
+        }
+        .action-hint {
+            text-align: center;
+            color: #666666;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+        /* -- Divider -- */
+        .divider {
+            border: none;
+            border-top: 1px solid #333333;
+            margin: 28px 0;
+        }
+        .kaka-quote {
+            background-color: #0B0B0B;
+            border: 1px solid #333333;
+            border-left: 3px solid #FFD700;
+            border-radius: 4px;
+            padding: 16px 20px;
+            margin: 24px 0;
+        }
+        .kaka-name {
+            color: #FFD700;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .kaka-text {
+            color: #CCCCCC;
+            font-size: 13px;
+            font-style: italic;
+            line-height: 1.6;
+        }
+        /* -- Footer -- */
+        .footer {
+            background-color: #0B0B0B;
+            padding: 20px 30px;
+            text-align: center;
+            border-top: 1px solid #333333;
+        }
+        .footer p {
+            color: #666666;
+            font-size: 11px;
+            margin: 4px 0;
+            line-height: 1.6;
+        }
+        .footer .brand {
+            color: #FFD700;
+            font-weight: 600;
+        }
+        .footer a {
+            color: #FFD700;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <span class="logo-actio">Actio</span><span class="logo-n">N</span><span class="logo-ow">ow</span>
+            </div>
+            <div class="header-slogan">Ready? ActioNow.</div>
+            <div class="header-sub">你的构想，即刻开拍。</div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="scene-label">WELCOME TO THE SET</div>
+            <p>Hi <span class="welcome-name" th:text="${username}">导演</span>，</p>
+            <p>恭喜您成功进组！您现在是 <strong>开拍 ActioNow</strong> 创作者社区的一员。</p>
+
+            <div class="feature-list">
+                <p style="color: #F5F5F5; font-weight: 600; margin-bottom: 18px;">在片场，您可以：</p>
+                <div class="feature-item">
+                    <div class="feature-icon"><span class="feature-dot"></span></div>
+                    <div class="feature-text"><strong>脚本库</strong> &mdash; 创作和管理专业剧本</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><span class="feature-dot"></span></div>
+                    <div class="feature-text"><strong>故事板</strong> &mdash; 设计精美的分镜画面</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><span class="feature-dot"></span></div>
+                    <div class="feature-text"><strong>剧本指令</strong> &mdash; 使用 AI 辅助生成创意内容</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><span class="feature-dot"></span></div>
+                    <div class="feature-text"><strong>通告单</strong> &mdash; 与演职员实时协作</div>
+                </div>
+            </div>
+
+            <!-- Kaka 副导 -->
+            <div class="kaka-quote">
+                <div class="kaka-name">Kaka &middot; 首席副导</div>
+                <div class="kaka-text">"我是 Kaka，你的副导。一切就绪，来，喊一声 Action!"</div>
+            </div>
+
+            <div class="action-wrap">
+                <a href="https://actionow.ai" class="btn-action">ACTION!</a>
+            </div>
+            <div class="action-hint">进入片场，即刻开拍</div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>如有任何问题，请联系我们：<a href="mailto:support@actionow.ai">support@actionow.ai</a></p>
+            <p><span class="brand">开拍 ActioNow</span> &mdash; Speed of Thought, Quality of Film.</p>
+        </div>
+    </div>
+</body>
+</html>

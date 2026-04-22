@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.actionow</groupId>
+        <artifactId>actionow-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>actionow-user</artifactId>
+    <name>Actionow User Service</name>
+    <description>用户服务：注册、登录、认证、OAuth</description>
+
+    <dependencies>
+        <!-- Common Web -->
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-web</artifactId>
+        </dependency>
+
+        <!-- Common Security -->
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-security</artifactId>
+        </dependency>
+
+        <!-- Common Redis -->
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-redis</artifactId>
+        </dependency>
+
+        <!-- OpenFeign -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+
+        <!-- Common Data -->
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-data</artifactId>
+        </dependency>
+
+        <!-- Common MQ -->
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-mq</artifactId>
+        </dependency>
+
+        <!-- Common Mail -->
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-mail</artifactId>
+        </dependency>
+
+        <!-- Hutool Captcha (验证码) -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-captcha</artifactId>
+        </dependency>
+
+        <!-- Actuator -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

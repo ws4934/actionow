@@ -1,0 +1,274 @@
+# ============================================
+# Actionow root .gitignore
+# ============================================
+# Monorepo: backend (Spring Boot) + web (Next.js) + docker
+# Per-module .gitignore files also exist under backend/ and web/.
+# ============================================
+
+# ============================================
+# Environment & Secrets (CRITICAL)
+# ============================================
+.env
+.env.*
+!.env.example
+!.env.*.example
+!**/.env.example
+!**/.env.*.example
+
+# Generic secret patterns
+.secrets/
+*.secret
+*.secrets
+secrets.*
+credentials.json
+service-account*.json
+*-credentials.json
+*_credentials.json
+api-keys.*
+apikeys.*
+
+# Cloud provider credentials
+.aws/
+aws-credentials*
+.gcp/
+gcp-credentials*
+gcloud-*.json
+.azure/
+azure-credentials*
+
+# Cloudflare / Wrangler
+.wrangler/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# Vercel
+.vercel
+
+# ============================================
+# Docker env files (per docker/ layout)
+# ============================================
+docker/.env
+docker/.env.*
+!docker/.env.example
+!docker/.env.*.example
+docker/*.env.bak
+docker/.env.*.bak
+docker/.env.*.bak.*
+
+# ============================================
+# SSL/TLS Certificates & Keys
+# ============================================
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.truststore
+!**/src/test/resources/*.pem
+!**/src/test/resources/*.crt
+!**/src/test/resources/*.key
+
+# SSH keys
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+*.ppk
+
+# ============================================
+# Java / Maven
+# ============================================
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+
+# Gradle (if ever used)
+.gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ============================================
+# Node.js / Next.js / Frontend
+# ============================================
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+.npm/
+.pnpm-store/
+.pnpm-debug.log*
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Build outputs
+build/
+dist/
+.open-next/
+.turbo/
+.swc/
+
+# TypeScript
+*.tsbuildinfo
+
+# ============================================
+# Testing / Coverage
+# ============================================
+coverage/
+*.lcov
+**/test-results/
+**/test-output/
+jacoco.exec
+htmlcov/
+.nyc_output/
+.pytest_cache/
+
+# ============================================
+# Logs
+# ============================================
+*.log
+*.log.*
+logs/
+**/logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================
+# Database dumps / backups
+# ============================================
+*.sql.bak
+*.dump
+*.db
+*.sqlite
+*.sqlite3
+*.rdb
+
+# ============================================
+# Terraform / Infra
+# ============================================
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+crash.log
+crash.*.log
+terraform.tfvars
+*.auto.tfvars
+!terraform.tfvars.example
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# ============================================
+# Kubernetes Secrets
+# ============================================
+**/k8s/*-secret.yaml
+**/k8s/*-secrets.yaml
+**/*-kubeconfig
+kubeconfig
+
+# ============================================
+# IDEs
+# ============================================
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+!.vscode/extensions.json
+*.code-workspace
+.fleet/
+.project
+.classpath
+.settings/
+.apt_generated
+.factorypath
+.springBeans
+.sts4-cache
+bin/
+out/
+cmake-build-*/
+/nbproject/private/
+.nb-gradle/
+
+# ============================================
+# Claude Code / AI assistant local state
+# ============================================
+.claude/settings.local.json
+.claude/.session*
+.claude/cache/
+.clinerules.local*
+.cursor/
+.aider*
+CLAUDE.local.md
+AGENTS.local.md
+
+# ============================================
+# OS files
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============================================
+# Temporary / scratch
+# ============================================
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+*.bak
+*.backup
+*.orig
+.cache/
+scratch/
+.scratch/
+TODO.local.md
+NOTES.local.md
+
+# ============================================
+# Archives (committed archives should be explicit)
+# ============================================
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# ============================================
+# Runtime
+# ============================================
+*.pid
+*.seed
+*.pid.lock

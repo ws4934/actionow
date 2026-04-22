@@ -1,0 +1,28 @@
+# Cloudflare Workers 配置文件 (OpenNext)
+# 详细文档: https://opennext.js.org/cloudflare
+
+name = "actionow-frontend"
+main = ".open-next/worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# 静态资源配置
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+# 生产环境变量 (敏感信息请通过 Cloudflare Dashboard 配置)
+[vars]
+API_BASE_URL = "https://api.actionow.ai"
+NEXT_PUBLIC_WS_URL = "wss://api.actionow.ai/ws"
+NEXT_PUBLIC_SITE_URL = "https://actionow.ai"
+
+# Workers 日志
+[observability]
+[observability.logs]
+enabled = true
+invocation_logs = true
+
+# Workers 跟踪
+[observability.traces]
+enabled = false

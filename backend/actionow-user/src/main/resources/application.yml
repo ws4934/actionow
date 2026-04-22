@@ -1,0 +1,138 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: actionow-user
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            actionow-workspace:
+              - uri: ${WORKSPACE_SERVICE_URL:http://actionow-workspace:8082}
+  # 数据源配置
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:actionow}?currentSchema=public&stringtype=unspecified
+    username: ${DB_USER:actionow}
+    password: ${DB_PASSWORD:actionow123}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      pool-name: ActionowUserHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  # Redis 配置
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+
+  # 邮件配置 (AWS SES SMTP)
+  mail:
+    host: ${MAIL_HOST:email-smtp.ap-northeast-1.amazonaws.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  # RabbitMQ 配置
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    ssl:
+      enabled: ${RABBITMQ_SSL_ENABLED:false}
+
+# MyBatis Plus 配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: assign_uuid
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+# JWT 配置
+actionow:
+  # 内部服务认证（HMAC签名）
+  internal:
+    auth-secret: ${INTERNAL_AUTH_SECRET:actionow-dev-internal-secret-key-32chars}
+    signature-max-age-seconds: 300
+  jwt:
+    secret: ${JWT_SECRET:actionow-default-secret-key-please-change-in-production}
+    issuer: actionow
+    access-token-expire: 7200
+    refresh-token-expire: 604800
+  # 邮件服务配置
+  mail:
+    enabled: true
+    provider: ${MAIL_PROVIDER:resend}
+    from: ${MAIL_FROM:support@actionow.ai}
+    from-name: 开拍 ActioNow
+    region: ap-northeast-1
+    retry:
+      max-attempts: 3
+      delay: 1000
+    resend:
+      api-key: ${RESEND_API_KEY:}
+  # OAuth 配置已迁移至 t_system_config 动态管理，通过 System 模块管理面板配置
+
+# SpringDoc/Swagger 配置
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    tags-sorter: alpha
+    operations-sorter: alpha
+    try-it-out-enabled: true
+    persist-authorization: true
+    with-credentials: true
+  show-actuator: false
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+# 日志配置
+logging:
+  level:
+    com.actionow: DEBUG
+    org.springframework.security: DEBUG
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    # 禁用邮件健康检查：Docker 环境下 SMTP 不可达会导致整体 DOWN → 容器重启
+    mail:
+      enabled: false

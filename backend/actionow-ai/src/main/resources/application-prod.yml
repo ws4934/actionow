@@ -1,0 +1,5 @@
+# Production overrides
+
+logging:
+  level:
+    com.actionow: INFO

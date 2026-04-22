@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.actionow</groupId>
+        <artifactId>actionow-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>actionow-agent</artifactId>
+    <name>Actionow Agent Service</name>
+    <description>智能体服务：基于 Spring AI Alibaba Agent Framework 的 Agent 框架，支持剧本创编等智能任务</description>
+
+    <properties>
+        <!-- Spring AI 1.1.2 -->
+        <spring-ai.version>1.1.2</spring-ai.version>
+        <!-- Spring AI Alibaba Agent Framework -->
+        <spring-ai-alibaba.version>1.1.2.0</spring-ai-alibaba.version>
+        <!-- Override Spring Boot to 3.5.0 for SAA compatibility -->
+        <spring-boot.version>3.5.0</spring-boot.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring AI BOM -->
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Spring AI Alibaba BOM -->
+            <dependency>
+                <groupId>com.alibaba.cloud.ai</groupId>
+                <artifactId>spring-ai-alibaba-bom</artifactId>
+                <version>${spring-ai-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- Actionow Common -->
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-data</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-redis</artifactId>
+        </dependency>
+        <!-- MQ for collaboration events -->
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-mq</artifactId>
+        </dependency>
+
+        <!-- OpenFeign -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+
+        <!-- Circuit Breaker -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+        </dependency>
+
+        <!-- WebFlux for streaming -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+        <!-- AOP for tool execution interception -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <!-- Spring AI Alibaba Agent Framework (SAA) -->
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-agent-framework</artifactId>
+            <version>${spring-ai-alibaba.version}</version>
+        </dependency>
+
+        <!-- Spring AI Model Providers -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-openai</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-anthropic</artifactId>
+        </dependency>
+        <!-- Google AI Studio / Gemini API -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-google-genai</artifactId>
+        </dependency>
+
+        <!-- Spring AI JDBC Chat Memory -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-model-chat-memory-repository-jdbc</artifactId>
+        </dependency>
+
+        <!-- Spring AI PgVector Store for RAG -->
+        <!-- NOTE: Not included by default to avoid build cache issues.
+             To enable RAG (actionow.saa.rag-enabled=true), add this dependency
+             and configure a VectorStore bean:
+             <dependency>
+                 <groupId>org.springframework.ai</groupId>
+                 <artifactId>spring-ai-pgvector-store</artifactId>
+             </dependency>
+        -->
+
+        <!-- Caffeine Cache (高性能本地缓存) -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
+        <!-- JTokkit for accurate token counting -->
+        <dependency>
+            <groupId>com.knuddels</groupId>
+            <artifactId>jtokkit</artifactId>
+        </dependency>
+
+        <!-- Actuator -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>aliyun</id>
+            <name>Aliyun Maven Repository</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+    </repositories>
+
+</project>

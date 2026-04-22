@@ -1,0 +1,60 @@
+# =====================================================
+# Actionow Web (Next.js Frontend) — Production Compose
+#
+# Usage:
+#   # Together with backend (recommended):
+#   docker compose \
+#     -f docker-compose.prod.yml \
+#     -f docker-compose.web.yml \
+#     --profile full up -d --build
+#
+#   # Web only (backend running elsewhere):
+#   docker compose -f docker-compose.web.yml up -d --build
+# =====================================================
+
+services:
+  web:
+    build:
+      context: ../web
+      dockerfile: ../docker/Dockerfile.web.prod
+      args:
+        API_BASE_URL: ${WEB_API_BASE_URL:-http://actionow-gateway:8080}
+        NEXT_PUBLIC_WS_URL: ${WEB_NEXT_PUBLIC_WS_URL:-ws://localhost:${GATEWAY_PORT:-8080}/ws}
+        NEXT_PUBLIC_SITE_URL: ${WEB_NEXT_PUBLIC_SITE_URL:-http://localhost:${WEB_PORT:-3000}}
+    image: actionow-web:${WEB_IMAGE_TAG:-latest}
+    container_name: actionow-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      # Server-side proxy target (used by /api/[...path]/route.ts).
+      # On the Docker network this should point to the gateway container.
+      API_BASE_URL: ${WEB_API_BASE_URL:-http://actionow-gateway:8080}
+      NEXT_PUBLIC_WS_URL: ${WEB_NEXT_PUBLIC_WS_URL:-ws://localhost:${GATEWAY_PORT:-8080}/ws}
+      NEXT_PUBLIC_SITE_URL: ${WEB_NEXT_PUBLIC_SITE_URL:-http://localhost:${WEB_PORT:-3000}}
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    networks:
+      - actionow-network
+    depends_on:
+      - gateway
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: ${WEB_MEMORY:-1G}
+    profiles:
+      - full
+      - web
+
+networks:
+  actionow-network:
+    external: false
+    name: actionow-network

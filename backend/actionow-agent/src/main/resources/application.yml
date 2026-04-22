@@ -1,0 +1,252 @@
+server:
+  port: 8091
+  tomcat:
+    max-http-form-post-size: 100MB
+    max-swallow-size: 100MB
+
+spring:
+  application:
+    name: actionow-agent
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            actionow-ai:
+              - uri: ${AI_SERVICE_URL:http://actionow-ai:8086}
+            actionow-project:
+              - uri: ${PROJECT_SERVICE_URL:http://actionow-project:8084}
+            actionow-task:
+              - uri: ${TASK_SERVICE_URL:http://actionow-task:8087}
+            actionow-wallet:
+              - uri: ${WALLET_SERVICE_URL:http://actionow-wallet:8083}
+            actionow-agent:
+              - uri: ${AGENT_SERVICE_URL:http://actionow-agent:8091}
+            actionow-workspace:
+              - uri: ${WORKSPACE_SERVICE_URL:http://actionow-workspace:8082}
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:actionow}?currentSchema=public&stringtype=unspecified
+    username: ${DB_USER:actionow}
+    password: ${DB_PASSWORD:actionow123}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      pool-name: ActionowAgentHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: 0
+      password: ${REDIS_PASSWORD:}
+
+  # RabbitMQ 配置
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    ssl:
+      enabled: ${RABBITMQ_SSL_ENABLED:false}
+
+  # Spring AI JDBC Chat Memory - 自动初始化 DDL
+  ai:
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 10000
+        read-timeout: 60000
+      actionow-ai:
+        # AI 服务独立配置：更长超时
+        connect-timeout: 15000
+        read-timeout: 120000
+  circuitbreaker:
+    enabled: true
+
+# Resilience4j 断路器配置
+resilience4j:
+  circuitbreaker:
+    instances:
+      # AI 服务断路器 - 更长超时，更宽容
+      ai-service:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 30s
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 100
+        slow-call-duration-threshold: 60s
+      # 默认断路器
+      default:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 10s
+        failure-rate-threshold: 50
+  timelimiter:
+    instances:
+      ai-service:
+        timeout-duration: 120s
+        cancel-running-future: true
+      default:
+        timeout-duration: 30s
+  retry:
+    instances:
+      ai-service:
+        max-attempts: 3
+        wait-duration: 2s
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - feign.RetryableException
+      default:
+        max-attempts: 2
+        wait-duration: 500ms
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: assign_uuid
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+# SAA (Spring AI Alibaba) 配置
+actionow:
+  # 内部服务认证（HMAC签名）
+  internal:
+    auth-secret: ${INTERNAL_AUTH_SECRET:actionow-dev-internal-secret-key-32chars}
+    signature-max-age-seconds: 300
+  skill:
+    # OSS ZIP 包地址（可选）。设置后服务启动及 reload 时自动下载并导入
+    package-url: ${SKILL_PACKAGE_URL:}
+
+  saa:
+    # 默认模型 ID（来自 t_llm_provider）
+    default-model: ${SAA_DEFAULT_MODEL:qwen-max}
+    # 最大 ReAct 迭代次数
+    max-iterations: ${SAA_MAX_ITERATIONS:20}
+    # RAG 开关
+    rag-enabled: ${RAG_ENABLED:false}
+
+  embedding:
+    # Gemini REST API Key（复用 GOOGLE_API_KEY）
+    api-key: ${GOOGLE_API_KEY:}
+    # text-embedding-004: Google 通用文本嵌入模型
+    model: ${EMBEDDING_MODEL:text-embedding-004}
+    dimension: 768
+    batch-size: 100
+
+  # Agent 上下文配置（token 驱动，不使用消息数限制）
+  context:
+    # contextWindow 使用比例（超过此阈值触发 auto-compact）
+    context-window-usage-ratio: 0.8
+    # Layer 1 micro-compact: 不压缩最近 N 轮（以 user 消息为界）
+    micro-compact-recent-rounds: 3
+    # Layer 1 micro-compact: WRITE/GENERATE/CONTROL 类工具的 tool_result 超过此字符数才压缩
+    micro-compact-threshold-chars: 300
+    # Layer 1 micro-compact: READ/SEARCH 类工具（参考数据）的压缩阈值（更宽松，0=不压缩）
+    micro-compact-reference-threshold-chars: 5000
+    # Layer 2 auto-compact: 保留最近 N 轮 raw messages
+    auto-compact-recent-rounds: 4
+    # Layer 2 auto-compact: 用于生成摘要的低成本 LLM Provider ID（留空则使用主模型）
+    summary-llm-provider-id:
+    # RAG 最大文档数（rag-enabled=true 时生效）
+    max-rag-documents: 10
+    # RAG 相关性阈值（rag-enabled=true 时生效）
+    rag-similarity-threshold: 0.6
+    # RAG 查询超时（毫秒）
+    rag-query-timeout-ms: 3000
+
+  # Agent 计费配置
+  agent:
+    # 视觉分析专用 LLM Provider ID（需支持多模态输入，如 GPT-4o / Claude / Gemini）
+    vision-llm-provider-id: ${VISION_LLM_PROVIDER_ID:}
+    billing:
+      idle-timeout-minutes: ${BILLING_IDLE_TIMEOUT:30}
+      batch-size: ${BILLING_BATCH_SIZE:50}
+      max-retry-count: ${BILLING_MAX_RETRY:3}
+      settle-interval-ms: ${BILLING_SETTLE_INTERVAL:300000}
+      retry-interval-ms: ${BILLING_RETRY_INTERVAL:600000}
+
+    # Agent 会话生命周期配置
+    session:
+      max-active-per-scope: ${SESSION_MAX_ACTIVE_PER_SCOPE:5}
+      max-active-global: ${SESSION_MAX_ACTIVE_GLOBAL:3}
+      max-total-per-user: ${SESSION_MAX_TOTAL_PER_USER:200}
+      idle-archive-days: ${SESSION_IDLE_ARCHIVE_DAYS:30}
+      soft-delete-retention-days: ${SESSION_SOFT_DELETE_RETENTION:90}
+      # SessionContextHolder 内存上下文过期时间（毫秒，默认 30 分钟）
+      context-expiry-ms: ${SESSION_CONTEXT_EXPIRY_MS:1800000}
+      batch-size: ${SESSION_BATCH_SIZE:100}
+
+    # Assistant 消息段落化写入 / 读取合并
+    #   per-segment-write.enabled=true  → runner 每个 message event 独立落一行 assistant_segment；
+    #                                     placeholder 仅作 generating→completed 的状态标记
+    #   segment-split.enabled=true      → 读侧把旧 placeholder 的 blob 按空行切回多段（兼容历史数据）
+    #   collapse-adjacent.enabled=true  → 读侧 + LLM 回灌侧合并相邻 assistant_segment 行，
+    #                                     避免前端出现 5-10 个连续小气泡、模型把自己的话读成 5 段独白
+    message:
+      per-segment-write:
+        enabled: ${AGENT_MESSAGE_PER_SEGMENT_WRITE:false}
+      segment-split:
+        enabled: ${AGENT_MESSAGE_SEGMENT_SPLIT:true}
+      collapse-adjacent:
+        enabled: ${AGENT_MESSAGE_COLLAPSE_ADJACENT:true}
+      # skip-placeholder.enabled=true → preflight 不再写空 placeholder 行；
+      #   "正在生成"状态改由 t_agent_session.generating_since 承载，心跳写 session.last_heartbeat_at。
+      # 必须同时配合 per-segment-write.enabled=true —— 否则文本 无处可落 会丢失。
+      skip-placeholder:
+        enabled: ${AGENT_MESSAGE_SKIP_PLACEHOLDER:false}
+
+    # Mission 自主执行配置
+    mission:
+      max-steps: ${MISSION_MAX_STEPS:50}
+      max-retries: ${MISSION_MAX_RETRIES:3}
+      max-context-steps: ${MISSION_MAX_CONTEXT_STEPS:10}
+      max-step-summary-chars: ${MISSION_MAX_STEP_SUMMARY_CHARS:500}
+      loop-warn-threshold: ${MISSION_LOOP_WARN_THRESHOLD:5}
+      loop-fail-threshold: ${MISSION_LOOP_FAIL_THRESHOLD:10}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    com.actionow: DEBUG
+    com.alibaba.cloud.ai: INFO
+    # MainAgentNodeAction 在 supervisor 输出自然语言时会尝试 JSON 路由解析并失败，
+    # 这是 SAA 框架的正常 fallback 路径（routing to FINISH），降噪处理
+    com.alibaba.cloud.ai.graph.agent.flow.node.MainAgentNodeAction: ERROR

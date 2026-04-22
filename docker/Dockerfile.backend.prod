@@ -1,0 +1,191 @@
+# =====================================================
+# Actionow Production Dockerfile - Multi-stage Build
+# Supports building from source without local pre-compilation
+# =====================================================
+
+# Stage 1: Build Stage
+FROM maven:3.9-eclipse-temurin-21 AS builder
+
+WORKDIR /build
+
+# Configure Maven repositories for reliable dependency downloads.
+# Primary: Aliyun mirrors (fast in China). Fallback: Maven Central (reliable).
+# The pom.xml declares an "aliyun" <repository> — we mirror it alongside "central"
+# to avoid duplicate hits to the same URL, and add Maven Central under a separate
+# ID ("maven-central-fallback") so it is NOT intercepted by the Aliyun mirror.
+RUN mkdir -p /root/.m2 && cat << 'EOF' > /root/.m2/settings.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+  <mirrors>
+    <!-- Spring repos: spring-milestones / spring-snapshots / spring-releases -->
+    <mirror>
+      <id>aliyun-spring</id>
+      <mirrorOf>spring,spring-milestones,spring-snapshots,spring-releases,spring-ext</mirrorOf>
+      <name>Aliyun Spring Mirror</name>
+      <url>https://maven.aliyun.com/repository/spring</url>
+    </mirror>
+    <!-- Spring plugin repos -->
+    <mirror>
+      <id>aliyun-spring-plugin</id>
+      <mirrorOf>spring-plugin,spring-plugins</mirrorOf>
+      <name>Aliyun Spring Plugin Mirror</name>
+      <url>https://maven.aliyun.com/repository/spring-plugin</url>
+    </mirror>
+    <!-- Mirror both "central" and the pom.xml "aliyun" repo through Aliyun.
+         This prevents double-downloading from the same Aliyun URL. -->
+    <mirror>
+      <id>aliyun-central</id>
+      <mirrorOf>central,aliyun</mirrorOf>
+      <name>Aliyun Central Mirror</name>
+      <url>https://maven.aliyun.com/repository/public</url>
+    </mirror>
+  </mirrors>
+  <!-- Fallback: Maven Central with a non-mirrored ID, so when Aliyun drops
+       connections, Maven can still resolve artifacts from the official repo. -->
+  <profiles>
+    <profile>
+      <id>central-fallback</id>
+      <repositories>
+        <repository>
+          <id>maven-central-fallback</id>
+          <url>https://repo1.maven.org/maven2/</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>central-fallback</activeProfile>
+  </activeProfiles>
+</settings>
+EOF
+
+# Copy Maven configuration first for better layer caching
+COPY pom.xml ./
+COPY actionow-common/pom.xml ./actionow-common/
+COPY actionow-common/actionow-common-api/pom.xml ./actionow-common/actionow-common-api/
+COPY actionow-common/actionow-common-core/pom.xml ./actionow-common/actionow-common-core/
+COPY actionow-common/actionow-common-data/pom.xml ./actionow-common/actionow-common-data/
+COPY actionow-common/actionow-common-file/pom.xml ./actionow-common/actionow-common-file/
+COPY actionow-common/actionow-common-mail/pom.xml ./actionow-common/actionow-common-mail/
+COPY actionow-common/actionow-common-mq/pom.xml ./actionow-common/actionow-common-mq/
+COPY actionow-common/actionow-common-oss/pom.xml ./actionow-common/actionow-common-oss/
+COPY actionow-common/actionow-common-redis/pom.xml ./actionow-common/actionow-common-redis/
+COPY actionow-common/actionow-common-security/pom.xml ./actionow-common/actionow-common-security/
+COPY actionow-common/actionow-common-web/pom.xml ./actionow-common/actionow-common-web/
+COPY actionow-gateway/pom.xml ./actionow-gateway/
+COPY actionow-user/pom.xml ./actionow-user/
+COPY actionow-workspace/pom.xml ./actionow-workspace/
+COPY actionow-wallet/pom.xml ./actionow-wallet/
+COPY actionow-billing/pom.xml ./actionow-billing/
+COPY actionow-project/pom.xml ./actionow-project/
+COPY actionow-ai/pom.xml ./actionow-ai/
+COPY actionow-task/pom.xml ./actionow-task/
+COPY actionow-collab/pom.xml ./actionow-collab/
+COPY actionow-system/pom.xml ./actionow-system/
+COPY actionow-canvas/pom.xml ./actionow-canvas/
+COPY actionow-agent/pom.xml ./actionow-agent/
+
+# Copy source code
+COPY actionow-common/ ./actionow-common/
+COPY actionow-gateway/ ./actionow-gateway/
+COPY actionow-user/ ./actionow-user/
+COPY actionow-workspace/ ./actionow-workspace/
+COPY actionow-wallet/ ./actionow-wallet/
+COPY actionow-billing/ ./actionow-billing/
+COPY actionow-project/ ./actionow-project/
+COPY actionow-ai/ ./actionow-ai/
+COPY actionow-task/ ./actionow-task/
+COPY actionow-collab/ ./actionow-collab/
+COPY actionow-system/ ./actionow-system/
+COPY actionow-canvas/ ./actionow-canvas/
+COPY actionow-agent/ ./actionow-agent/
+
+# Build argument for specific service (optional, builds all if not specified)
+ARG SERVICE_NAME
+
+# Build with BuildKit cache mount for .m2/repository.
+# Shell-level retry loop (up to 3 attempts) because 12 parallel builder stages
+# can saturate the Aliyun CDN, causing truncated downloads ("Premature end of
+# Content-Length delimited message body") that Maven's Aether retry handler
+# does not cover.  Before each attempt we purge .lastUpdated marker files —
+# Maven refuses to re-download a failed artifact for 24 h otherwise.
+RUN --mount=type=cache,target=/root/.m2/repository \
+    set -e; \
+    MAX_ATTEMPTS=3; \
+    for attempt in $(seq 1 $MAX_ATTEMPTS); do \
+        find /root/.m2/repository -name "*.lastUpdated" -delete 2>/dev/null || true; \
+        find /root/.m2/repository -name "*.jar" -size 0 -delete 2>/dev/null || true; \
+        echo "=== Maven build attempt $attempt / $MAX_ATTEMPTS ==="; \
+        if [ -n "$SERVICE_NAME" ]; then \
+            mvn clean package -pl actionow-common,${SERVICE_NAME} -am -DskipTests -B -q && break; \
+        else \
+            mvn clean package -DskipTests -B -q && break; \
+        fi; \
+        if [ "$attempt" -eq "$MAX_ATTEMPTS" ]; then \
+            echo "Build failed after $MAX_ATTEMPTS attempts"; exit 1; \
+        fi; \
+        echo "Attempt $attempt failed, retrying in 5s..."; sleep 5; \
+    done
+
+# =====================================================
+# Stage 2: Runtime Stage
+# =====================================================
+FROM eclipse-temurin:21-jre-alpine AS runtime
+
+LABEL maintainer="Actionow Team"
+LABEL description="Actionow Production Image"
+
+# Build arguments
+ARG SERVICE_NAME
+ARG SERVICE_PORT=8080
+
+# Environment variables
+ENV TZ=Asia/Shanghai
+ENV SERVICE_NAME=${SERVICE_NAME}
+ENV SERVER_PORT=${SERVICE_PORT}
+
+# Install packages (try Aliyun mirror first, fall back to default CDN)
+RUN (sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+    apk add --no-cache tzdata curl) || \
+    (sed -i 's/mirrors.aliyun.com/dl-cdn.alpinelinux.org/g' /etc/apk/repositories && \
+    apk add --no-cache tzdata curl) && \
+    cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone && \
+    addgroup -S actionow && \
+    adduser -S actionow -G actionow
+
+WORKDIR /app
+
+# JVM options optimized for containers
+ENV JAVA_OPTS="-XX:+UseG1GC \
+    -XX:MaxGCPauseMillis=100 \
+    -XX:InitialRAMPercentage=50.0 \
+    -XX:MaxRAMPercentage=75.0 \
+    -XX:+UseContainerSupport \
+    -XX:+UseStringDeduplication \
+    -XX:+ExitOnOutOfMemoryError \
+    -XX:+HeapDumpOnOutOfMemoryError \
+    -XX:HeapDumpPath=/app/logs/heapdump.hprof \
+    -Djava.security.egd=file:/dev/./urandom \
+    --enable-preview"
+
+# Copy JAR from builder
+COPY --from=builder /build/${SERVICE_NAME}/target/*.jar app.jar
+
+# Create logs directory
+RUN mkdir -p /app/logs && chown -R actionow:actionow /app
+
+# Switch to non-root user
+USER actionow
+
+EXPOSE ${SERVICE_PORT}
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+    CMD curl -sf http://localhost:${SERVER_PORT}/actuator/health || exit 1
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS $JAVA_EXTRA_OPTS -jar app.jar"]

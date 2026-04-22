@@ -1,0 +1,42 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: actionow-project
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    import:
+      - classpath:actionow-shared.yml
+      - classpath:oss-shared.yml
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            actionow-user:
+              - uri: ${USER_SERVICE_URL:http://actionow-user:8081}
+            actionow-canvas:
+              - uri: ${CANVAS_SERVICE_URL:http://actionow-canvas:8090}
+            actionow-workspace:
+              - uri: ${WORKSPACE_SERVICE_URL:http://actionow-workspace:8082}
+            actionow-task:
+              - uri: ${TASK_SERVICE_URL:http://actionow-task:8087}
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:actionow}?currentSchema=public&stringtype=unspecified
+    username: ${DB_USER:actionow}
+    password: ${DB_PASSWORD:actionow123}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      pool-name: ActionowProjectHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+logging:
+  level:
+    com.actionow: DEBUG

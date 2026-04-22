@@ -1,0 +1,462 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: actionow-gateway
+  profiles:
+    active: dev
+  cloud:
+    gateway:
+      # 全局超时配置
+      httpclient:
+        connect-timeout: 3000
+        response-timeout: 30s
+      routes:
+        # 用户服务 - 认证相关
+        - id: actionow-user-auth
+          uri: ${USER_SERVICE_URL:http://actionow-user:8081}
+          predicates:
+            - Path=/api/user/auth/**
+          filters:
+            - StripPrefix=2
+          metadata:
+            connect-timeout: 3000
+            response-timeout: 10000
+        # 用户服务 - 其他接口
+        - id: actionow-user
+          uri: ${USER_SERVICE_URL:http://actionow-user:8081}
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - StripPrefix=2
+          metadata:
+            connect-timeout: 3000
+            response-timeout: 30000
+        # 工作空间服务
+        - id: actionow-workspace
+          uri: ${WORKSPACE_SERVICE_URL:http://actionow-workspace:8082}
+          predicates:
+            - Path=/api/workspaces/**
+          filters:
+            - StripPrefix=1
+          metadata:
+            connect-timeout: 3000
+            response-timeout: 30000
+        # 项目服务 - 灵感模块 (/api/inspiration/xxx -> /inspiration/xxx)
+        - id: actionow-inspiration
+          uri: ${PROJECT_SERVICE_URL:http://actionow-project:8084}
+          predicates:
+            - Path=/api/inspiration/**
+          filters:
+            - StripPrefix=1
+          metadata:
+            connect-timeout: 3000
+            response-timeout: 60000
+        # 项目服务 - 主路由 (/api/project/xxx -> /xxx)
+        - id: actionow-project
+          uri: ${PROJECT_SERVICE_URL:http://actionow-project:8084}
+          predicates:
+            - Path=/api/project/**
+          filters:
+            - StripPrefix=2
+          metadata:
+            connect-timeout: 3000
+            response-timeout: 30000
+        # 项目服务 - 公共资源库浏览 (/api/library/** -> /library/**)
+        - id: actionow-project-library
+          uri: ${PROJECT_SERVICE_URL:http://actionow-project:8084}
+          predicates:
+            - Path=/api/library/**
+          filters:
+            - StripPrefix=1
+          metadata:
+            connect-timeout: 3000
+            response-timeout: 30000
+        # 项目服务 - 系统管理员资源库（需在 actionow-system 通用路由之前，避免被误拦截）
+        # (/api/system/library/** -> /system/library/**)
+        - id: actionow-project-system-library
+          uri: ${PROJECT_SERVICE_URL:http://actionow-project:8084}
+          predicates:
+            - Path=/api/system/library/**
+          filters:
+            - StripPrefix=1
+          metadata:
+            connect-timeout: 3000
+            response-timeout: 30000
+        # 文件代理服务 - 通过Gateway进行token验证后代理访问OSS文件
+        - id: actionow-file-proxy
+          uri: ${PROJECT_SERVICE_URL:http://actionow-project:8084}
+          predicates:
+            - Path=/api/files/proxy/**
+          filters:
+            - StripPrefix=1
+          metadata:
+            connect-timeout: 5000
+            response-timeout: 60000
+        # Canvas服务 - 画布相关
+        - id: actionow-canvas
+          uri: ${CANVAS_SERVICE_URL:http://actionow-canvas:8090}
+          predicates:
+            - Path=/api/canvas/**
+          filters:
+            - StripPrefix=1
+          metadata:
+            connect-timeout: 3000
+            response-timeout: 30000
+        # AI 服务 - 主路由 (StripPrefix=2: /api/ai/xxx -> /xxx)
+        - id: actionow-ai
+          uri: ${AI_SERVICE_URL:http://actionow-ai:8086}
+          predicates:
+            - Path=/api/ai/model-providers,/api/ai/model-providers/**,/api/ai/plugins,/api/ai/plugins/**,/api/ai/groovy-templates,/api/ai/groovy-templates/**,/api/ai/callback/**,/api/ai/llm-providers,/api/ai/llm-providers/**
+          filters:
+            - StripPrefix=2
+          metadata:
+            connect-timeout: 5000
+            response-timeout: 120000
+        # AI 服务 - 提示词模板路由 (StripPrefix=1: /api/ai/template -> /ai/template)
+        - id: actionow-ai-template
+          uri: ${AI_SERVICE_URL:http://actionow-ai:8086}
+          predicates:
+            - Path=/api/ai/template/**
+          filters:
+            - StripPrefix=1
+          metadata:
+            connect-timeout: 5000
+            response-timeout: 120000
+        # 任务服务
+        - id: actionow-task
+          uri: ${TASK_SERVICE_URL:http://actionow-task:8087}
+          predicates:
+            - Path=/api/tasks/**
+          filters:
+            - StripPrefix=1
+          metadata:
+            connect-timeout: 3000
+            response-timeout: 30000
+        # 钱包服务
+        - id: actionow-wallet
+          uri: ${WALLET_SERVICE_URL:http://actionow-wallet:8083}
+          predicates:
+            - Path=/api/wallet/**
+          filters:
+            - StripPrefix=1
+          metadata:
+            connect-timeout: 3000
+            response-timeout: 30000
+        # 计费服务
+        - id: actionow-billing
+          uri: ${BILLING_SERVICE_URL:http://actionow-billing:8092}
+          predicates:
+            - Path=/api/billing/**
+          filters:
+            - StripPrefix=1
+          metadata:
+            connect-timeout: 3000
+            response-timeout: 30000
+        # 协作服务 - REST API
+        - id: actionow-collab
+          uri: ${COLLAB_SERVICE_URL:http://actionow-collab:8088}
+          predicates:
+            - Path=/api/collab/**
+          filters:
+            - StripPrefix=1
+          metadata:
+            connect-timeout: 3000
+            response-timeout: 30000
+        # 统一 WebSocket 端点（协作 + 通知）
+        - id: actionow-ws
+          uri: ${COLLAB_WS_URL:ws://actionow-collab:8088}
+          predicates:
+            - Path=/ws,/sockjs/**
+          metadata:
+            connect-timeout: 10000
+            response-timeout: 600000
+        # 画布 WebSocket 端点
+        - id: actionow-canvas-ws
+          uri: ${CANVAS_WS_URL:ws://actionow-canvas:8090}
+          predicates:
+            - Path=/ws/canvas/**
+          metadata:
+            connect-timeout: 10000
+            response-timeout: 600000
+        # 系统服务
+        - id: actionow-system
+          uri: ${SYSTEM_SERVICE_URL:http://actionow-system:8089}
+          predicates:
+            - Path=/api/system/**
+          filters:
+            - StripPrefix=1
+          metadata:
+            connect-timeout: 3000
+            response-timeout: 30000
+        # Agent 服务 - AI 智能体（SSE 流式输出，需要较长超时）
+        - id: actionow-agent
+          uri: ${AGENT_SERVICE_URL:http://actionow-agent:8091}
+          predicates:
+            - Path=/api/agent/**
+          filters:
+            - StripPrefix=1
+            # 注意：不再使用 SseProxy，全局 SseStreamingFilter 会自动处理 SSE 请求
+            - name: RequestSize
+              args:
+                maxSize: 100MB
+          metadata:
+            connect-timeout: 5000
+            response-timeout: 180000
+            # 为 SseStreamingFilter 提供 strip-prefix 信息
+            strip-prefix: 1
+
+        # ========== Swagger API 文档路由 ==========
+        # 用户服务 API 文档
+        - id: actionow-user-docs
+          uri: ${USER_SERVICE_URL:http://actionow-user:8081}
+          predicates:
+            - Path=/api/user/v3/api-docs,/api/user/v3/api-docs/**
+          filters:
+            - StripPrefix=2
+        # 工作空间服务 API 文档
+        - id: actionow-workspace-docs
+          uri: ${WORKSPACE_SERVICE_URL:http://actionow-workspace:8082}
+          predicates:
+            - Path=/api/workspaces/v3/api-docs,/api/workspaces/v3/api-docs/**
+          filters:
+            - RewritePath=/api/workspaces/(?<segment>.*), /$\{segment}
+        # 钱包服务 API 文档
+        - id: actionow-wallet-docs
+          uri: ${WALLET_SERVICE_URL:http://actionow-wallet:8083}
+          predicates:
+            - Path=/api/wallet/v3/api-docs,/api/wallet/v3/api-docs/**
+          filters:
+            - RewritePath=/api/wallet/(?<segment>.*), /$\{segment}
+        # 计费服务 API 文档
+        - id: actionow-billing-docs
+          uri: ${BILLING_SERVICE_URL:http://actionow-billing:8092}
+          predicates:
+            - Path=/api/billing/v3/api-docs,/api/billing/v3/api-docs/**
+          filters:
+            - RewritePath=/api/billing/(?<segment>.*), /$\{segment}
+        # 项目服务 API 文档
+        - id: actionow-project-docs
+          uri: ${PROJECT_SERVICE_URL:http://actionow-project:8084}
+          predicates:
+            - Path=/api/project/v3/api-docs,/api/project/v3/api-docs/**
+          filters:
+            - StripPrefix=2
+        # AI 服务 API 文档
+        - id: actionow-ai-docs
+          uri: ${AI_SERVICE_URL:http://actionow-ai:8086}
+          predicates:
+            - Path=/api/ai/v3/api-docs,/api/ai/v3/api-docs/**
+          filters:
+            - StripPrefix=2
+        # 任务服务 API 文档
+        - id: actionow-task-docs
+          uri: ${TASK_SERVICE_URL:http://actionow-task:8087}
+          predicates:
+            - Path=/api/tasks/v3/api-docs,/api/tasks/v3/api-docs/**
+          filters:
+            - RewritePath=/api/tasks/(?<segment>.*), /$\{segment}
+        # 协作服务 API 文档
+        - id: actionow-collab-docs
+          uri: ${COLLAB_SERVICE_URL:http://actionow-collab:8088}
+          predicates:
+            - Path=/api/collab/v3/api-docs,/api/collab/v3/api-docs/**
+          filters:
+            - RewritePath=/api/collab/(?<segment>.*), /$\{segment}
+        # 系统服务 API 文档
+        - id: actionow-system-docs
+          uri: ${SYSTEM_SERVICE_URL:http://actionow-system:8089}
+          predicates:
+            - Path=/api/system/v3/api-docs,/api/system/v3/api-docs/**
+          filters:
+            - RewritePath=/api/system/(?<segment>.*), /$\{segment}
+        # 画布服务 API 文档
+        - id: actionow-canvas-docs
+          uri: ${CANVAS_SERVICE_URL:http://actionow-canvas:8090}
+          predicates:
+            - Path=/api/canvas/v3/api-docs,/api/canvas/v3/api-docs/**
+          filters:
+            - RewritePath=/api/canvas/(?<segment>.*), /$\{segment}
+        # Agent 服务 API 文档
+        - id: actionow-agent-docs
+          uri: ${AGENT_SERVICE_URL:http://actionow-agent:8091}
+          predicates:
+            - Path=/api/agent/v3/api-docs,/api/agent/v3/api-docs/**
+          filters:
+            - RewritePath=/api/agent/(?<segment>.*), /$\{segment}
+
+# 网关配置
+actionow:
+  # 内部服务认证（HMAC签名）
+  internal:
+    auth-secret: ${INTERNAL_AUTH_SECRET:actionow-dev-internal-secret-key-32chars}
+    signature-max-age-seconds: 300
+  gateway:
+    # 白名单路径（无需认证）
+    whitelist:
+      # 用户服务 - 公开接口
+      - /api/user/auth/captcha
+      - /api/user/auth/verify-code
+      - /api/user/auth/register
+      - /api/user/auth/login
+      - /api/user/auth/login/code
+      - /api/user/auth/refresh
+      - /api/user/oauth/login-config
+      - /api/user/oauth/*/authorize
+      - /api/user/oauth/*/callback
+      - /api/user/users/check/**
+      - /api/user/users/password/reset
+      # 用户服务 - 邀请码公开接口
+      - /api/user/user/invitation-code/registration-config
+      - /api/user/user/invitation-code/validate/**
+      # 工作空间服务 - 公开邀请链接（仅查看邀请详情，不包含 accept）
+      - /api/workspaces/invite/*
+      # 计费服务 - 支付渠道回调（Stripe/Alipay/WeChatPay）
+      - /api/billing/callback/**
+      # 健康检查 - 仅开放安全端点
+      - /actuator/health
+      - /actuator/health/**
+      - /actuator/info
+      # WebSocket - 在 WebSocket 握手拦截器中验证 token
+      - /ws/**
+      - /sockjs/**
+      # Swagger UI - 开发环境公开访问，生产环境建议移除或添加 IP 白名单
+      - /swagger-ui.html
+      - /swagger-ui/**
+      - /v3/api-docs/**
+      - /webjars/**
+      # 各服务 API 文档路由（通过网关聚合）
+      - /api/*/v3/api-docs
+      - /api/*/swagger-ui/**
+    # JWT 配置
+    # 重要：生产环境必须设置 JWT_SECRET 环境变量
+    # 密钥长度建议至少32个字符
+    jwt:
+      secret: ${JWT_SECRET:actionow-default-secret-key-please-change-in-production}
+      header: Authorization
+      prefix: "Bearer "
+    # 限流配置
+    rate-limit:
+      enabled: true
+      # 全局限流（每秒）- 保护整个系统免受DDoS攻击
+      global-limit: 1000
+      # IP限流 - 防止单IP滥用
+      ip-limit: 200
+      ip-window: 60
+      # 用户限流 - 防止单用户滥用
+      user-limit: 300
+      user-window: 60
+      # API特定限流（每秒）- 已迁移到动态配置（runtime.gateway.rate_limit.api_limits）
+      # 以下仅作为参考文档保留，实际值从 GatewayRuntimeConfigService 读取
+      api-limits:
+        /api/ai/model-providers: 10
+        /api/ai/groovy-templates: 10
+        /api/tasks/ai/: 10
+        /api/files/upload: 5
+        /api/user/auth/login: 10
+        /api/user/auth/register: 5
+    # CORS 配置
+    # 重要：生产环境应配置具体的前端域名，避免使用通配符
+    cors:
+      enabled: true
+      # 开发环境使用通配符，生产环境应修改为具体域名如：
+      # - https://app.actionow.com
+      # - https://www.actionow.com
+      allowed-origins:
+        - "*"
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+        - PATCH
+      allowed-headers:
+        - "*"
+      # 注意：当 allow-credentials 为 true 时，生产环境不应使用 "*" 作为 allowed-origins
+      allow-credentials: true
+      max-age: 3600
+    # 日志配置
+    log:
+      enabled: true
+      log-headers: true
+      # 启用请求体日志（仅对 log-body-paths 中配置的路径生效）
+      log-body: true
+      log-body-paths:
+        - /api/user/auth/login
+        - /api/user/auth/register
+      sensitive-headers:
+        - Authorization
+        - X-Api-Key
+        - Cookie
+      sensitive-fields:
+        - password
+        - token
+        - secret
+        - creditCard
+        - cvv
+
+# Redis 配置
+spring.data.redis:
+  host: ${REDIS_HOST:localhost}
+  port: ${REDIS_PORT:6379}
+  password: ${REDIS_PASSWORD:}
+  database: 0
+
+# Springdoc OpenAPI 配置（网关聚合）
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    # 使用 SwaggerConfig 中配置的 URLs
+    urls-primary-name: 用户服务
+    # UI 配置
+    display-request-duration: true
+    show-extensions: true
+    show-common-extensions: true
+    deep-linking: true
+    default-models-expand-depth: 1
+    default-model-expand-depth: 1
+    doc-expansion: list
+    filter: true
+    operations-sorter: alpha
+    tags-sorter: alpha
+    try-it-out-enabled: true
+    persist-authorization: true
+    with-credentials: true
+  # 网关模式
+  cache:
+    disabled: false
+
+# 日志配置
+logging:
+  level:
+    com.actionow: DEBUG
+    com.actionow.gateway.filter.SseStreamingFilter: DEBUG
+    org.springframework.cloud.gateway: INFO
+    reactor.netty: INFO
+
+# Actuator - 仅暴露安全端点
+management:
+  endpoints:
+    web:
+      exposure:
+        # 生产环境只暴露 health 和 info，避免敏感信息泄露
+        include: health,info
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: when-authorized
+    info:
+      enabled: true
+  # 健康检查分组
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true

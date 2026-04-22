@@ -1,0 +1,121 @@
+server:
+  port: 8092
+
+spring:
+  application:
+    name: actionow-billing
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            actionow-wallet:
+              - uri: ${WALLET_SERVICE_URL:http://actionow-wallet:8083}
+            actionow-workspace:
+              - uri: ${WORKSPACE_SERVICE_URL:http://actionow-workspace:8082}
+            actionow-system:
+              - uri: ${SYSTEM_SERVICE_URL:http://actionow-system:8089}
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:actionow}?currentSchema=public&stringtype=unspecified
+    username: ${DB_USER:actionow}
+    password: ${DB_PASSWORD:actionow123}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      pool-name: ActionowBillingHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: assign_uuid
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 3000
+        read-timeout: 10000
+      actionow-wallet:
+        connect-timeout: 2000
+        read-timeout: 8000
+      actionow-workspace:
+        connect-timeout: 2000
+        read-timeout: 8000
+      actionow-system:
+        connect-timeout: 2000
+        read-timeout: 5000
+  circuitbreaker:
+    enabled: true
+
+# 计费配置
+# 订阅价格映射说明:
+# actionow.billing.stripe.plan-price-ids.PRO.MONTHLY=price_xxx
+# actionow.billing.stripe.plan-price-ids.TEAMM.MONTHLY=price_xxx
+actionow:
+  internal:
+    auth-secret: ${INTERNAL_AUTH_SECRET:actionow-dev-internal-secret-key-32chars}
+    signature-max-age-seconds: 300
+  jwt:
+    secret: ${JWT_SECRET:actionow-default-secret-key-please-change-in-production}
+    issuer: actionow
+    access-token-expire: 7200
+    refresh-token-expire: 604800
+  billing:
+    topup:
+      points-per-major-unit: ${BILLING_POINTS_PER_MAJOR_UNIT:10}
+      minor-per-major-unit: ${BILLING_MINOR_PER_MAJOR_UNIT:100}
+    subscription:
+      default-currency: ${BILLING_SUBSCRIPTION_CURRENCY:USD}
+    stripe:
+      api-key: ${STRIPE_API_KEY:}
+      webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+      default-success-url: ${STRIPE_SUCCESS_URL:http://localhost:5173/billing/success?session_id={CHECKOUT_SESSION_ID}}
+      default-cancel-url: ${STRIPE_CANCEL_URL:http://localhost:5173/billing/cancel}
+      plan-price-ids:
+        PRO:
+          MONTHLY: ${STRIPE_PRICE_PRO_MONTHLY:}
+          YEARLY: ${STRIPE_PRICE_PRO_YEARLY:}
+        TEAMM:
+          MONTHLY: ${STRIPE_PRICE_TEAMM_MONTHLY:}
+          YEARLY: ${STRIPE_PRICE_TEAMM_YEARLY:}
+    wechatpay:
+      app-id: ${WECHAT_APP_ID:}
+      mch-id: ${WECHAT_MCH_ID:}
+      api-v3-key: ${WECHAT_API_V3_KEY:}
+      private-key-path: ${WECHAT_PRIVATE_KEY_PATH:classpath:cert/apiclient_key.pem}
+      mch-serial-number: ${WECHAT_MCH_SERIAL_NUMBER:}
+      notify-url: ${WECHAT_NOTIFY_URL:http://localhost:8092/billing/callback/WECHATPAY}
+
+logging:
+  level:
+    com.actionow: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized

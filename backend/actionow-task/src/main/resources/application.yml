@@ -1,0 +1,120 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: actionow-task
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    import: classpath:actionow-shared.yml
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            actionow-ai:
+              - uri: ${AI_SERVICE_URL:http://actionow-ai:8086}
+            actionow-project:
+              - uri: ${PROJECT_SERVICE_URL:http://actionow-project:8084}
+            actionow-wallet:
+              - uri: ${WALLET_SERVICE_URL:http://actionow-wallet:8083}
+            actionow-workspace:
+              - uri: ${WORKSPACE_SERVICE_URL:http://actionow-workspace:8082}
+            actionow-user:
+              - uri: ${USER_SERVICE_URL:http://actionow-user:8081}
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:actionow}?currentSchema=public&stringtype=unspecified
+    username: ${DB_USER:actionow}
+    password: ${DB_PASSWORD:actionow123}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      pool-name: ActionowTaskHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  rabbitmq:
+    listener:
+      simple:
+        acknowledge-mode: manual
+        prefetch: 10
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          max-interval: 10000
+          multiplier: 2
+
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 10000
+        read-timeout: 60000
+        logger-level: basic
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        slow-call-duration-threshold: 120s
+        slow-call-rate-threshold: 80
+    instances:
+      actionow-ai:
+        base-config: default
+        slow-call-duration-threshold: 60s
+      actionow-wallet:
+        base-config: default
+        wait-duration-in-open-state: 15s
+      actionow-asset:
+        base-config: default
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 120s
+    instances:
+      actionow-ai:
+        timeout-duration: 120s
+
+actionow:
+  outbox:
+    enabled: true
+    poll-interval-ms: 2000
+    cleanup-interval-ms: 3600000
+    stats-interval-ms: 300000
+  task:
+    max-concurrent-tasks: 10
+    execution:
+      concurrency: 5
+      max-concurrency: 10
+    generation:
+      lock-expire-seconds: 600
+      lock-retry-count: 3
+      callback-base-url: ${TASK_CALLBACK_BASE_URL:http://actionow-task:8087}
+    compensation:
+      enabled: true
+      max-retry-count: 5
+      scan-interval-ms: 30000
+      batch-size: 50
+      initial-retry-delay-seconds: 30
+      max-retry-delay-seconds: 3600
+    polling:
+      scan-interval-ms: 15000
+      batch-size: 50
+    batch:
+      scan-interval-ms: 30000
+      stale-timeout-ms: 600000
+
+logging:
+  level:
+    com.actionow: DEBUG

@@ -1,0 +1,491 @@
+# =====================================================
+# Actionow Platform - Apps-Only Docker Compose
+#
+# Optimized for: 8vCPU / 16GiB server
+# Infra (PG, Redis, RabbitMQ, MinIO) runs on host, NOT in Docker.
+#
+# Memory budget: Apps ~12.5G | OS + host infra ~3.5G
+# Network: host mode (zero NAT overhead, apps reach localhost infra directly)
+#
+# Deployment Profiles:
+#   --profile all           : Start all application services
+#   --profile gateway       : Start only gateway (use multiple --profile for selective)
+#
+# Usage:
+#   # Start all app services
+#   docker compose -f docker-compose.apps.yml --env-file .env.apps --profile all up -d --build
+#
+#   # Start specific services only
+#   docker compose -f docker-compose.apps.yml --env-file .env.apps \
+#     --profile gateway --profile user --profile workspace up -d --build
+#
+#   # Rebuild and restart a single service
+#   docker compose -f docker-compose.apps.yml --env-file .env.apps \
+#     --profile ai up -d --build --force-recreate
+#
+#   # View logs
+#   docker compose -f docker-compose.apps.yml --env-file .env.apps --profile all logs -f gateway
+#
+#   # Stop all
+#   docker compose -f docker-compose.apps.yml --env-file .env.apps --profile all down
+#
+# Via deploy.sh (recommended):
+#   COMPOSE_MODE=apps ./deploy.sh up                    # Start all
+#   COMPOSE_MODE=apps ./deploy.sh up gateway user       # Start specific
+#   COMPOSE_MODE=apps ./deploy.sh rebuild ai agent      # Rebuild specific
+# =====================================================
+
+# YAML Anchors for reusable configurations
+x-common-env: &common-env
+  TZ: ${TZ:-Asia/Shanghai}
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  INTERNAL_AUTH_SECRET: ${INTERNAL_AUTH_SECRET:?INTERNAL_AUTH_SECRET is required}
+  USER_SERVICE_URL: ${USER_SERVICE_URL:-http://127.0.0.1:8081}
+  WORKSPACE_SERVICE_URL: ${WORKSPACE_SERVICE_URL:-http://127.0.0.1:8082}
+  WALLET_SERVICE_URL: ${WALLET_SERVICE_URL:-http://127.0.0.1:8083}
+  PROJECT_SERVICE_URL: ${PROJECT_SERVICE_URL:-http://127.0.0.1:8084}
+  AI_SERVICE_URL: ${AI_SERVICE_URL:-http://127.0.0.1:8086}
+  TASK_SERVICE_URL: ${TASK_SERVICE_URL:-http://127.0.0.1:8087}
+  COLLAB_SERVICE_URL: ${COLLAB_SERVICE_URL:-http://127.0.0.1:8088}
+  SYSTEM_SERVICE_URL: ${SYSTEM_SERVICE_URL:-http://127.0.0.1:8089}
+  CANVAS_SERVICE_URL: ${CANVAS_SERVICE_URL:-http://127.0.0.1:8090}
+  AGENT_SERVICE_URL: ${AGENT_SERVICE_URL:-http://127.0.0.1:8091}
+  BILLING_SERVICE_URL: ${BILLING_SERVICE_URL:-http://127.0.0.1:8092}
+  COLLAB_WS_URL: ${COLLAB_WS_URL:-ws://127.0.0.1:8088}
+  CANVAS_WS_URL: ${CANVAS_WS_URL:-ws://127.0.0.1:8090}
+  TASK_CALLBACK_BASE_URL: ${TASK_CALLBACK_BASE_URL:-http://127.0.0.1:8087}
+  ACTIONOW_AI_SERVICE_URL: ${ACTIONOW_AI_SERVICE_URL:-http://127.0.0.1:8086}
+
+x-db-env: &db-env
+  DB_HOST: ${DB_HOST:-127.0.0.1}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${DB_NAME:-actionow}
+  DB_USER: ${DB_USER:-actionow}
+  DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+
+x-redis-env: &redis-env
+  REDIS_HOST: ${REDIS_HOST:-127.0.0.1}
+  REDIS_PORT: ${REDIS_PORT:-6379}
+  REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+
+x-rabbitmq-env: &rabbitmq-env
+  RABBITMQ_HOST: ${RABBITMQ_HOST:-127.0.0.1}
+  RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+  RABBITMQ_USER: ${RABBITMQ_USER:-actionow}
+  RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD is required}
+  RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+  RABBITMQ_SSL_ENABLED: ${RABBITMQ_SSL_ENABLED:-false}
+
+x-oss-env: &oss-env
+  OSS_TYPE: ${OSS_TYPE:-minio}
+  OSS_DOMAIN: ${OSS_DOMAIN:-}
+  # MinIO config
+  MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://127.0.0.1:9000}
+  MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-}
+  MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-}
+  MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-actionow-assets}
+  # AWS S3 config
+  S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
+  S3_REGION: ${S3_REGION:-us-east-1}
+  S3_BUCKET: ${S3_BUCKET:-}
+  S3_TRANSFER_ACCELERATION: ${S3_TRANSFER_ACCELERATION:-false}
+  S3_CLOUDFRONT_DOMAIN: ${S3_CLOUDFRONT_DOMAIN:-}
+  S3_CLOUDFRONT_KEY_PAIR_ID: ${S3_CLOUDFRONT_KEY_PAIR_ID:-}
+  S3_CLOUDFRONT_PRIVATE_KEY_PATH: ${S3_CLOUDFRONT_PRIVATE_KEY_PATH:-}
+  S3_PRESIGNED_EXPIRE: ${S3_PRESIGNED_EXPIRE:-3600}
+  # Cloudflare R2 config
+  R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:-}
+  R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+  R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+  R2_BUCKET: ${R2_BUCKET:-}
+  R2_PUBLIC_DOMAIN: ${R2_PUBLIC_DOMAIN:-}
+  R2_PRESIGNED_EXPIRE: ${R2_PRESIGNED_EXPIRE:-3600}
+  # Aliyun OSS config
+  ALIYUN_ENDPOINT: ${ALIYUN_ENDPOINT:-}
+  ALIYUN_ACCESS_KEY_ID: ${ALIYUN_ACCESS_KEY_ID:-}
+  ALIYUN_ACCESS_KEY_SECRET: ${ALIYUN_ACCESS_KEY_SECRET:-}
+  ALIYUN_BUCKET: ${ALIYUN_BUCKET:-}
+  ALIYUN_INTERNAL_ENDPOINT: ${ALIYUN_INTERNAL_ENDPOINT:-}
+  ALIYUN_PRESIGNED_EXPIRE: ${ALIYUN_PRESIGNED_EXPIRE:-3600}
+  # Volcengine TOS config
+  TOS_ENDPOINT: ${TOS_ENDPOINT:-}
+  TOS_ACCESS_KEY_ID: ${TOS_ACCESS_KEY_ID:-}
+  TOS_SECRET_ACCESS_KEY: ${TOS_SECRET_ACCESS_KEY:-}
+  TOS_BUCKET: ${TOS_BUCKET:-}
+  TOS_REGION: ${TOS_REGION:-cn-beijing}
+  TOS_PUBLIC_DOMAIN: ${TOS_PUBLIC_DOMAIN:-}
+  TOS_PRESIGNED_EXPIRE: ${TOS_PRESIGNED_EXPIRE:-3600}
+
+# JVM heap is auto-sized by Dockerfile's MaxRAMPercentage=75% of container memory limit.
+# Only GC tuning flags go here — no -Xms/-Xmx needed.
+x-jvm-env: &jvm-env
+  JAVA_EXTRA_OPTS: ${JVM_OPTS:--XX:MaxGCPauseMillis=200 -XX:+UseStringDeduplication}
+
+x-build-base: &build-base
+  context: ../backend
+  dockerfile: ../docker/Dockerfile.backend.prod
+
+x-service-base: &service-base
+  restart: unless-stopped
+  network_mode: host
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "50m"
+      max-file: "3"
+
+x-healthcheck-base: &healthcheck-base
+  interval: 30s
+  timeout: 10s
+  retries: 5
+  start_period: 90s
+
+services:
+  # =====================================================
+  # Application Services (host network, external infra)
+  # =====================================================
+
+  gateway:
+    <<: *service-base
+    container_name: actionow-gateway
+    profiles:
+      - all
+      - gateway
+    build:
+      <<: *build-base
+      args:
+        SERVICE_NAME: actionow-gateway
+        SERVICE_PORT: 8080
+    environment:
+      <<: [*common-env, *redis-env, *jvm-env]
+      SERVER_PORT: 8080
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8080/actuator/health"]
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: ${GATEWAY_MEMORY:-1G}
+
+  user:
+    <<: *service-base
+    container_name: actionow-user
+    profiles:
+      - all
+      - user
+    build:
+      <<: *build-base
+      args:
+        SERVICE_NAME: actionow-user
+        SERVICE_PORT: 8081
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *jvm-env]
+      SERVER_PORT: 8081
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      # OAuth 配置已迁移至 t_system_config，通过 System 管理面板配置
+      # Mail Configuration
+      MAIL_PROVIDER: ${MAIL_PROVIDER:-resend}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      MAIL_FROM: ${MAIL_FROM:-support@example.com}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8081/actuator/health"]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: ${USER_MEMORY:-1G}
+
+  workspace:
+    <<: *service-base
+    container_name: actionow-workspace
+    profiles:
+      - all
+      - workspace
+    build:
+      <<: *build-base
+      args:
+        SERVICE_NAME: actionow-workspace
+        SERVICE_PORT: 8082
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *jvm-env]
+      SERVER_PORT: 8082
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8082/actuator/health"]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: ${WORKSPACE_MEMORY:-1G}
+
+  wallet:
+    <<: *service-base
+    container_name: actionow-wallet
+    profiles:
+      - all
+      - wallet
+    build:
+      <<: *build-base
+      args:
+        SERVICE_NAME: actionow-wallet
+        SERVICE_PORT: 8083
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *jvm-env]
+      SERVER_PORT: 8083
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8083/actuator/health"]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: ${WALLET_MEMORY:-1G}
+
+  billing:
+    <<: *service-base
+    container_name: actionow-billing
+    profiles:
+      - all
+      - billing
+    build:
+      <<: *build-base
+      args:
+        SERVICE_NAME: actionow-billing
+        SERVICE_PORT: 8092
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *jvm-env]
+      SERVER_PORT: 8092
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL:-http://localhost:5173/billing/success?session_id={CHECKOUT_SESSION_ID}}
+      STRIPE_CANCEL_URL: ${STRIPE_CANCEL_URL:-http://localhost:5173/billing/cancel}
+      BILLING_SUBSCRIPTION_CURRENCY: ${BILLING_SUBSCRIPTION_CURRENCY:-USD}
+      BILLING_POINTS_PER_MAJOR_UNIT: ${BILLING_POINTS_PER_MAJOR_UNIT:-10}
+      BILLING_MINOR_PER_MAJOR_UNIT: ${BILLING_MINOR_PER_MAJOR_UNIT:-100}
+      WECHAT_APP_ID: ${WECHAT_APP_ID:-}
+      WECHAT_MCH_ID: ${WECHAT_MCH_ID:-}
+      WECHAT_API_V3_KEY: ${WECHAT_API_V3_KEY:-}
+      WECHAT_PRIVATE_KEY_PATH: ${WECHAT_PRIVATE_KEY_PATH:-classpath:cert/apiclient_key.pem}
+      WECHAT_MCH_SERIAL_NUMBER: ${WECHAT_MCH_SERIAL_NUMBER:-}
+      WECHAT_NOTIFY_URL: ${WECHAT_NOTIFY_URL:-}
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8092/actuator/health"]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: ${BILLING_MEMORY:-1G}
+
+  project:
+    <<: *service-base
+    container_name: actionow-project
+    profiles:
+      - all
+      - project
+    build:
+      <<: *build-base
+      args:
+        SERVICE_NAME: actionow-project
+        SERVICE_PORT: 8084
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *oss-env, *jvm-env]
+      SERVER_PORT: 8084
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8084/actuator/health"]
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: ${PROJECT_MEMORY:-1G}
+
+  ai:
+    <<: *service-base
+    container_name: actionow-ai
+    profiles:
+      - all
+      - ai
+    build:
+      <<: *build-base
+      args:
+        SERVICE_NAME: actionow-ai
+        SERVICE_PORT: 8086
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *oss-env, *jvm-env]
+      SERVER_PORT: 8086
+      # AI Provider Keys
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com}
+      STABILITY_API_KEY: ${STABILITY_API_KEY:-}
+      # Dify
+      DIFY_BASE_URL: ${DIFY_BASE_URL:-}
+      # Groovy
+      GROOVY_MAX_EXECUTION_TIME_MS: ${GROOVY_MAX_EXECUTION_TIME_MS:-120000}
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8086/actuator/health"]
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: ${AI_MEMORY:-2G}
+
+  task:
+    <<: *service-base
+    container_name: actionow-task
+    profiles:
+      - all
+      - task
+    build:
+      <<: *build-base
+      args:
+        SERVICE_NAME: actionow-task
+        SERVICE_PORT: 8087
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *oss-env, *jvm-env]
+      SERVER_PORT: 8087
+      TASK_CALLBACK_BASE_URL: ${TASK_CALLBACK_BASE_URL:-}
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8087/actuator/health"]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.75"
+          memory: ${TASK_MEMORY:-1G}
+
+  collab:
+    <<: *service-base
+    container_name: actionow-collab
+    profiles:
+      - all
+      - collab
+    build:
+      <<: *build-base
+      args:
+        SERVICE_NAME: actionow-collab
+        SERVICE_PORT: 8088
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *jvm-env]
+      SERVER_PORT: 8088
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8088/actuator/health"]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.75"
+          memory: ${COLLAB_MEMORY:-1G}
+
+  system:
+    <<: *service-base
+    container_name: actionow-system
+    profiles:
+      - all
+      - system
+    build:
+      <<: *build-base
+      args:
+        SERVICE_NAME: actionow-system
+        SERVICE_PORT: 8089
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *jvm-env]
+      SERVER_PORT: 8089
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8089/actuator/health"]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: ${SYSTEM_MEMORY:-1G}
+
+  canvas:
+    <<: *service-base
+    container_name: actionow-canvas
+    profiles:
+      - all
+      - canvas
+    build:
+      <<: *build-base
+      args:
+        SERVICE_NAME: actionow-canvas
+        SERVICE_PORT: 8090
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *jvm-env]
+      SERVER_PORT: 8090
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8090/actuator/health"]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: ${CANVAS_MEMORY:-1G}
+
+  agent:
+    <<: *service-base
+    container_name: actionow-agent
+    profiles:
+      - all
+      - agent
+    build:
+      <<: *build-base
+      args:
+        SERVICE_NAME: actionow-agent
+        SERVICE_PORT: 8091
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *jvm-env]
+      SERVER_PORT: 8091
+      # Google API Key (used for Gemini embedding)
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-004}
+      # SAA (Spring AI Alibaba) Configuration
+      SAA_DEFAULT_MODEL: ${SAA_DEFAULT_MODEL:-gemini-3-flash-preview}
+      SAA_MAX_ITERATIONS: ${SAA_MAX_ITERATIONS:-20}
+      RAG_ENABLED: ${RAG_ENABLED:-false}
+      # Agent Billing
+      BILLING_IDLE_TIMEOUT: ${BILLING_IDLE_TIMEOUT:-30}
+      BILLING_BATCH_SIZE: ${BILLING_BATCH_SIZE:-50}
+      BILLING_MAX_RETRY: ${BILLING_MAX_RETRY:-3}
+      # Agent Session
+      SESSION_MAX_ACTIVE_PER_SCOPE: ${SESSION_MAX_ACTIVE_PER_SCOPE:-5}
+      SESSION_MAX_ACTIVE_GLOBAL: ${SESSION_MAX_ACTIVE_GLOBAL:-3}
+      SESSION_MAX_TOTAL_PER_USER: ${SESSION_MAX_TOTAL_PER_USER:-200}
+      SESSION_IDLE_ARCHIVE_DAYS: ${SESSION_IDLE_ARCHIVE_DAYS:-30}
+      SESSION_SOFT_DELETE_RETENTION: ${SESSION_SOFT_DELETE_RETENTION:-90}
+      SESSION_BATCH_SIZE: ${SESSION_BATCH_SIZE:-100}
+      # Agent Billing Scheduler
+      BILLING_SETTLE_INTERVAL: ${BILLING_SETTLE_INTERVAL:-300000}
+      BILLING_RETRY_INTERVAL: ${BILLING_RETRY_INTERVAL:-600000}
+      # Agent Mission
+      MISSION_MAX_STEPS: ${MISSION_MAX_STEPS:-50}
+      MISSION_MAX_RETRIES: ${MISSION_MAX_RETRIES:-3}
+      MISSION_MAX_CONTEXT_STEPS: ${MISSION_MAX_CONTEXT_STEPS:-10}
+      MISSION_MAX_STEP_SUMMARY_CHARS: ${MISSION_MAX_STEP_SUMMARY_CHARS:-500}
+      MISSION_LOOP_WARN_THRESHOLD: ${MISSION_LOOP_WARN_THRESHOLD:-5}
+      MISSION_LOOP_FAIL_THRESHOLD: ${MISSION_LOOP_FAIL_THRESHOLD:-10}
+      # Skill Package
+      SKILL_PACKAGE_URL: ${SKILL_PACKAGE_URL:-}
+      # Assistant message 段落化（SSE↔DB 1:1）
+      AGENT_MESSAGE_PER_SEGMENT_WRITE: ${AGENT_MESSAGE_PER_SEGMENT_WRITE:-true}
+      AGENT_MESSAGE_SKIP_PLACEHOLDER: ${AGENT_MESSAGE_SKIP_PLACEHOLDER:-true}
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8091/actuator/health"]
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: ${AGENT_MEMORY:-2G}

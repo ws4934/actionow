@@ -1,0 +1,234 @@
+# ============================================
+# Actionow .gitignore
+# ============================================
+
+# ============================================
+# Java / Maven
+# ============================================
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+
+# ============================================
+# Gradle (if used)
+# ============================================
+.gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ============================================
+# IntelliJ IDEA
+# ============================================
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+cmake-build-*/
+
+# ============================================
+# Eclipse / STS
+# ============================================
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+bin/
+
+# ============================================
+# NetBeans
+# ============================================
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# ============================================
+# VS Code
+# ============================================
+.vscode/
+*.code-workspace
+
+# ============================================
+# OS Files
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============================================
+# Logs
+# ============================================
+*.log
+logs/
+**/logs/
+*.log.*
+
+# ============================================
+# Temporary Files
+# ============================================
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.cache/
+
+# ============================================
+# Environment & Secrets (CRITICAL)
+# ============================================
+!.env.example
+!.env.*.example
+.secrets
+*.secret
+*.secrets
+credentials.json
+service-account*.json
+*-credentials.json
+*_credentials.json
+
+# AWS
+.aws/
+aws-credentials*
+
+# ============================================
+# Terraform
+# ============================================
+deploy/terraform/.terraform/
+deploy/terraform/*.tfstate
+deploy/terraform/*.tfstate.*
+deploy/terraform/*.tfstate.backup
+deploy/terraform/terraform.tfvars
+deploy/terraform/*.auto.tfvars
+deploy/terraform/crash.log
+deploy/terraform/override.tf
+deploy/terraform/override.tf.json
+deploy/terraform/*_override.tf
+deploy/terraform/*_override.tf.json
+# Keep terraform.tfvars.example
+!deploy/terraform/terraform.tfvars.example
+
+# ============================================
+# Deploy Configs (Secrets)
+# ============================================
+deploy/.env.deploy
+deploy/.env.aws
+deploy/.env.aws.bak
+deploy/infrastructure-config.env
+deploy/infrastructure-outputs.txt
+deploy/infrastructure-outputs.json
+deploy/**/*.pem
+deploy/**/*.key
+
+# ============================================
+# Docker
+# ============================================
+docker/.env
+docker/.env.apps
+docker/.env.apps.bak
+docker/.env.prod
+docker/.env.bundle
+!docker/.env.example
+!docker/.env.apps.example
+*.pid
+
+# ============================================
+# Kubernetes Secrets
+# ============================================
+**/k8s/*-secret.yaml
+**/k8s/*-secrets.yaml
+**/*-kubeconfig
+kubeconfig
+
+# ============================================
+# SSL/TLS Certificates
+# ============================================
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+!**/src/test/resources/*.pem
+!**/src/test/resources/*.crt
+
+# ============================================
+# Database
+# ============================================
+*.sql.bak
+*.dump
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================
+# Test Reports & Coverage
+# ============================================
+**/test-results/
+**/test-output/
+jacoco.exec
+**/coverage/
+*.lcov
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.pytest_cache/
+nosetests.xml
+coverage.xml
+
+# ============================================
+# Node.js (if frontend exists)
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.yarn/
+
+# ============================================
+# Documentation (Project Specific)
+# ============================================
+/docs/
+CLAUDE.md
+
+# ============================================
+# Misc
+# ============================================
+HELP.md
+*.bak
+*.backup
+*.orig
+
+# ============================================
+# Local Development Notes (Optional)
+# ============================================
+TODO.local.md
+NOTES.md
+scratch/
+.scratch/

@@ -1,0 +1,82 @@
+# ===========================================
+# CI Workflow - Build and Test
+# ===========================================
+# Triggers on push and pull requests to main/develop branches.
+# Builds the project and runs unit tests.
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  JAVA_VERSION: '21'
+  MAVEN_OPTS: '-Xmx1024m'
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        run: ./mvnw clean compile -B -T 2C
+
+      - name: Run Unit Tests
+        run: ./mvnw test -B
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: '**/target/surefire-reports/*.xml'
+          retention-days: 7
+
+      - name: Package
+        run: ./mvnw package -DskipTests -B -T 2C
+
+      - name: Upload JARs
+        uses: actions/upload-artifact@v4
+        with:
+          name: jars
+          path: '**/target/*.jar'
+          retention-days: 3
+
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Checkstyle
+        run: ./mvnw checkstyle:check -B || true
+        continue-on-error: true
+
+      - name: Run SpotBugs
+        run: ./mvnw spotbugs:check -B || true
+        continue-on-error: true

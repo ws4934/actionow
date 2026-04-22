@@ -1,0 +1,43 @@
+# 生产环境配置覆盖
+# 关闭 Swagger/API-docs 公开访问
+
+actionow:
+  gateway:
+    cors:
+      allowed-origins:
+        - "https://app.actionow.ai"
+        - "https://www.actionow.ai"
+    whitelist:
+      # 用户服务 - 公开接口
+      - /api/user/auth/captcha
+      - /api/user/auth/verify-code
+      - /api/user/auth/register
+      - /api/user/auth/login
+      - /api/user/auth/login/code
+      - /api/user/auth/refresh
+      - /api/user/oauth/*/authorize
+      - /api/user/oauth/*/callback
+      - /api/user/users/check/**
+      - /api/user/users/password/reset
+      # 用户服务 - 邀请码公开接口
+      - /api/user/user/invitation-code/registration-config
+      - /api/user/user/invitation-code/validate/**
+      # 工作空间服务 - 公开邀请链接
+      - /api/workspaces/invite/*
+      # 计费服务 - 支付渠道回调
+      - /api/billing/callback/**
+      # 健康检查
+      - /actuator/health
+      - /actuator/health/**
+      - /actuator/info
+      # WebSocket
+      - /ws/**
+      - /sockjs/**
+      # 注意：生产环境不包含 swagger-ui、v3/api-docs、webjars、api/*/v3/api-docs 等路径
+
+# 禁用 Springdoc OpenAPI
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

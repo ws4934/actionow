@@ -1,0 +1,104 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: actionow-workspace
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            actionow-user:
+              - uri: ${USER_SERVICE_URL:http://actionow-user:8081}
+            actionow-wallet:
+              - uri: ${WALLET_SERVICE_URL:http://actionow-wallet:8083}
+
+  # 数据源配置
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:actionow}?currentSchema=public&stringtype=unspecified
+    username: ${DB_USER:actionow}
+    password: ${DB_PASSWORD:actionow123}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      pool-name: ActionowWorkspaceHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  # Redis 配置
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+
+  # RabbitMQ 配置（用于钱包创建失败补偿消息）
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    ssl:
+      enabled: ${RABBITMQ_SSL_ENABLED:false}
+
+# Feign 配置
+feign:
+  client:
+    config:
+      # 全局默认配置
+      default:
+        connect-timeout: 3000
+        read-timeout: 10000
+      # 钱包服务专项配置（钱包操作需要在 10s 内响应）
+      actionow-wallet:
+        connect-timeout: 2000
+        read-timeout: 8000
+      # 用户服务配置
+      actionow-user:
+        connect-timeout: 2000
+        read-timeout: 5000
+  circuitbreaker:
+    enabled: true
+
+# MyBatis Plus 配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: assign_uuid
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+# 日志配置
+logging:
+  level:
+    com.actionow: DEBUG
+
+# 内部服务认证（HMAC签名）
+actionow:
+  internal:
+    auth-secret: ${INTERNAL_AUTH_SECRET:actionow-dev-internal-secret-key-32chars}
+    signature-max-age-seconds: 300
+  outbox:
+    enabled: true
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized

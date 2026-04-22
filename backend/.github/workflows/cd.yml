@@ -1,0 +1,249 @@
+# ===========================================
+# CD Workflow - Build, Push, and Deploy
+# ===========================================
+# Triggers on push to main branch.
+# Builds Docker images, pushes to ECR, and deploys to ECS.
+
+name: CD
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+  workflow_dispatch:
+    inputs:
+      services:
+        description: 'Services to deploy (comma-separated or "all")'
+        required: false
+        default: 'all'
+      environment:
+        description: 'Deployment environment'
+        required: false
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+  ECS_CLUSTER: actionow-production
+  JAVA_VERSION: '21'
+
+jobs:
+  detect-changes:
+    name: Detect Changed Services
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.detect.outputs.services }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed services
+        id: detect
+        run: |
+          ALL_SERVICES='["gateway","user","workspace","wallet","project","ai","task","collab","system","canvas","agent"]'
+
+          if [ "${{ github.event.inputs.services }}" == "all" ] || [ -z "${{ github.event.inputs.services }}" ]; then
+            # Check for changes in each service
+            SERVICES=()
+            for service in gateway user workspace wallet project ai task collab system canvas agent; do
+              if git diff --name-only HEAD~1 HEAD | grep -q "actionow-${service}/"; then
+                SERVICES+=("${service}")
+              fi
+            done
+
+            # If common module changed, rebuild all
+            if git diff --name-only HEAD~1 HEAD | grep -q "actionow-common/"; then
+              echo "services=$ALL_SERVICES" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+
+            # If pom.xml changed, rebuild all
+            if git diff --name-only HEAD~1 HEAD | grep -q "^pom.xml"; then
+              echo "services=$ALL_SERVICES" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+
+            # If no services detected (e.g., manual trigger), deploy all
+            if [ ${#SERVICES[@]} -eq 0 ]; then
+              echo "services=$ALL_SERVICES" >> $GITHUB_OUTPUT
+            else
+              echo "services=$(printf '%s\n' "${SERVICES[@]}" | jq -R . | jq -s .)" >> $GITHUB_OUTPUT
+            fi
+          else
+            # Use specified services
+            echo "services=$(echo '${{ github.event.inputs.services }}' | tr ',' '\n' | jq -R . | jq -s .)" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-push:
+    name: Build and Push
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.detect-changes.outputs.services) }}
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build service with Maven
+        run: |
+          ./mvnw clean package \
+            -pl actionow-${{ matrix.service }} -am \
+            -DskipTests -B -T 2C
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Create ECR repository if not exists
+        run: |
+          aws ecr describe-repositories --repository-names actionow/${{ matrix.service }} 2>/dev/null || \
+          aws ecr create-repository \
+            --repository-name actionow/${{ matrix.service }} \
+            --image-scanning-configuration scanOnPush=true \
+            --image-tag-mutability MUTABLE
+
+      - name: Set image tag
+        id: image-tag
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          echo "tag=${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "full_tag=${{ env.ECR_REGISTRY }}/actionow/${{ matrix.service }}:${SHORT_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.runtime
+          push: true
+          build-args: |
+            JAR_FILE=actionow-${{ matrix.service }}/target/actionow-${{ matrix.service }}-*.jar
+          tags: |
+            ${{ env.ECR_REGISTRY }}/actionow/${{ matrix.service }}:${{ steps.image-tag.outputs.tag }}
+            ${{ env.ECR_REGISTRY }}/actionow/${{ matrix.service }}:latest
+
+      - name: Output image info
+        run: |
+          echo "Built and pushed: ${{ steps.image-tag.outputs.full_tag }}"
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-and-push]
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.detect-changes.outputs.services) }}
+      max-parallel: 3
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get image tag
+        id: image-tag
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          echo "tag=${SHORT_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Update ECS service
+        run: |
+          SERVICE=${{ matrix.service }}
+          IMAGE="${{ env.ECR_REGISTRY }}/actionow/${SERVICE}:${{ steps.image-tag.outputs.tag }}"
+
+          echo "Deploying $SERVICE with image $IMAGE"
+
+          # Check if task definition exists
+          if ! aws ecs describe-task-definition --task-definition actionow-${SERVICE} 2>/dev/null; then
+            echo "⚠️ Task definition actionow-${SERVICE} does not exist. Skipping deployment."
+            echo "Please create the ECS task definition and service first."
+            exit 0
+          fi
+
+          # Get current task definition
+          TASK_DEF=$(aws ecs describe-task-definition \
+            --task-definition actionow-${SERVICE} \
+            --query 'taskDefinition' \
+            --output json)
+
+          # Update image in task definition
+          NEW_TASK_DEF=$(echo $TASK_DEF | jq \
+            --arg IMAGE "$IMAGE" \
+            '.containerDefinitions[0].image = $IMAGE |
+             del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+
+          # Register new task definition
+          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --cli-input-json "$NEW_TASK_DEF" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          echo "New task definition: $NEW_TASK_DEF_ARN"
+
+          # Update service
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${SERVICE} \
+            --task-definition $NEW_TASK_DEF_ARN \
+            --force-new-deployment
+
+      - name: Wait for deployment
+        run: |
+          SERVICE=${{ matrix.service }}
+          # Check if service exists before waiting
+          if ! aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services ${SERVICE} --query 'services[0].status' --output text 2>/dev/null | grep -q ACTIVE; then
+            echo "⚠️ ECS service ${SERVICE} does not exist or is not active. Skipping wait."
+            exit 0
+          fi
+          echo "Waiting for service ${SERVICE} to stabilize..."
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${SERVICE}
+          echo "Service ${SERVICE} deployment completed!"
+
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: always()
+
+    steps:
+      - name: Deployment Status
+        run: |
+          if [ "${{ needs.deploy.result }}" == "success" ]; then
+            echo "✅ All deployments successful!"
+          else
+            echo "❌ Some deployments failed!"
+            exit 1
+          fi

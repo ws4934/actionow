@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.actionow.agent.mapper.AgentSessionMapper">
+
+    <!-- resultMap: 显式声明 JSONB 字段的 typeHandler，其余列自动映射 -->
+    <resultMap id="sessionResultMap" type="com.actionow.agent.entity.AgentSessionEntity" autoMapping="true">
+        <id property="id" column="id"/>
+        <result property="scopeContext" column="scope_context"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result property="extras" column="extras"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result property="skillNames" column="skill_names"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+    </resultMap>
+
+    <!-- 根据 standaloneEnabled 和 scriptId 查询用户会话 -->
+    <select id="selectByStandalone" resultMap="sessionResultMap">
+        SELECT DISTINCT s.*
+        FROM t_agent_session s
+        <if test="standalone != null">
+            LEFT JOIN public.t_agent_config c ON s.agent_type = c.agent_type AND c.deleted = 0
+        </if>
+        <where>
+            s.deleted = 0
+            AND s.user_id = #{userId}
+            AND COALESCE(s.extras->>'internalSession', 'false') != 'true'
+            <if test="scriptId != null">
+                AND s.scope_context->>'scriptId' = #{scriptId}
+            </if>
+            <if test="standalone != null">
+                <if test="standalone == true">
+                    <!-- 独立 Agent: standalone_enabled=true 且不是协调器 -->
+                    AND c.standalone_enabled = true AND (c.is_coordinator = false OR c.is_coordinator IS NULL)
+                </if>
+                <if test="standalone == false">
+                    <!-- 协作 Agent: 协调器或非独立 Agent -->
+                    AND (c.is_coordinator = true OR c.standalone_enabled = false OR c.standalone_enabled IS NULL)
+                </if>
+            </if>
+        </where>
+        ORDER BY s.last_active_at DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 统计会话数量（用于分页） -->
+    <select id="countByStandalone" resultType="long">
+        SELECT COUNT(DISTINCT s.id)
+        FROM t_agent_session s
+        <if test="standalone != null">
+            LEFT JOIN public.t_agent_config c ON s.agent_type = c.agent_type AND c.deleted = 0
+        </if>
+        <where>
+            s.deleted = 0
+            AND s.user_id = #{userId}
+            AND COALESCE(s.extras->>'internalSession', 'false') != 'true'
+            <if test="scriptId != null">
+                AND s.scope_context->>'scriptId' = #{scriptId}
+            </if>
+            <if test="standalone != null">
+                <if test="standalone == true">
+                    <!-- 独立 Agent: standalone_enabled=true 且不是协调器 -->
+                    AND c.standalone_enabled = true AND (c.is_coordinator = false OR c.is_coordinator IS NULL)
+                </if>
+                <if test="standalone == false">
+                    <!-- 协作 Agent: 协调器或非独立 Agent -->
+                    AND (c.is_coordinator = true OR c.standalone_enabled = false OR c.standalone_enabled IS NULL)
+                </if>
+            </if>
+        </where>
+    </select>
+
+</mapper>

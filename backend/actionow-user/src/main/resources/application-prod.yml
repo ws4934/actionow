@@ -1,0 +1,13 @@
+# Production overrides
+
+# 禁用 Springdoc OpenAPI
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    com.actionow: INFO
+    org.springframework.security: INFO

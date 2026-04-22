@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.actionow</groupId>
+        <artifactId>actionow-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>actionow-billing</artifactId>
+    <name>Actionow Billing Service</name>
+    <description>计费服务：支付订单、订阅、支付渠道回调</description>
+
+    <properties>
+        <stripe-java.version>31.4.0</stripe-java.version>
+        <wechatpay-java.version>0.2.14</wechatpay-java.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-data</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>${stripe-java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.wechatpay-apiv3</groupId>
+            <artifactId>wechatpay-java</artifactId>
+            <version>${wechatpay-java.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

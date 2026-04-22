@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.actionow</groupId>
+        <artifactId>actionow-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>actionow-ai</artifactId>
+    <name>Actionow AI Service</name>
+    <description>AI服务：AI模型调用、内容生成、提示词管理</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-data</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-mq</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-oss</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.actionow</groupId>
+            <artifactId>actionow-common-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+        <!-- WebClient for AI API calls -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <!-- Jackson for JSON serialization -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <!-- JSONPath for response mapping -->
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+        </dependency>
+        <!-- Groovy for script-based model integration -->
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy-json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.craftercms</groupId>
+            <artifactId>groovy-sandbox</artifactId>
+        </dependency>
+        <!-- Resilience4j for retry and rate limiting -->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-reactor</artifactId>
+        </dependency>
+        <!-- Caffeine for caching -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

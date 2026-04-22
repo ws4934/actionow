@@ -1,0 +1,33 @@
+# =====================================================
+# Actionow Microservice Dockerfile (Development)
+# Uses volume mount for JAR files, supports hot reload
+# =====================================================
+
+FROM eclipse-temurin:21-jre-alpine
+
+LABEL maintainer="Actionow Team"
+
+# Set timezone
+ENV TZ=Asia/Shanghai
+RUN apk add --no-cache tzdata curl && \
+    cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
+
+WORKDIR /app
+
+# JVM options
+ENV JAVA_OPTS="-XX:+UseG1GC \
+    -XX:MaxGCPauseMillis=100 \
+    -XX:InitialRAMPercentage=50.0 \
+    -XX:MaxRAMPercentage=75.0 \
+    -Djava.security.egd=file:/dev/./urandom \
+    --enable-preview"
+
+# Service JAR path (via environment variable)
+ENV SERVICE_JAR=""
+ENV SERVER_PORT=8080
+
+EXPOSE ${SERVER_PORT}
+
+# Start command - reads JAR from mounted target directory
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS $JAVA_EXTRA_OPTS -jar /app/target/*.jar"]

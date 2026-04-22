@@ -1,0 +1,1662 @@
+{
+  "landing": {
+    "nav": {
+      "features": "功能亮点",
+      "scenarios": "创作场景",
+      "workflow": "工作流程",
+      "login": "登录",
+      "getStarted": "开始创作"
+    },
+    "hero": {
+      "titleLine1": "Multi-Agent",
+      "titleLine2": "Coordination",
+      "brandPrefix": "ACTIO",
+      "brandHighlight": "N",
+      "brandSuffix": "OW"
+    },
+    "marquee": {
+      "item1": "AI 驱动创作",
+      "item2": "多 Agent 协同",
+      "item3": "从剧本到成片"
+    },
+    "content": {
+      "title": "全流程 AI 创作协同",
+      "subtitle": "编剧、导演、美术、分镜……多个 AI Agent 各司其职，协同完成从剧本到成片的全流程创作。",
+      "startCreating": "开始创作",
+      "learnMore": "了解更多"
+    },
+    "agentCards": {
+      "strategyLead": "咔咔·片场统筹官",
+      "strategyLeadDesc": "统一调度创意、任务与团队协作节奏",
+      "scriptwriter": "咔咔·通告单管家",
+      "scriptwriterDesc": "自动生成排期、优先级与执行清单",
+      "storyboardDirector": "咔咔·剧本指令师",
+      "storyboardDirectorDesc": "将创意意图转化为结构化专业提示词",
+      "voiceoverArtist": "咔咔·镜头分镜官",
+      "voiceoverArtistDesc": "把脚本快速转成镜头规划与分镜结构",
+      "videoEditor": "咔咔·终剪质控官",
+      "videoEditorDesc": "在发布前对齐节奏、字幕与成片质量",
+      "growthMarketer": "咔咔·杀青发布官",
+      "growthMarketerDesc": "一键导出发布并持续追踪投放表现",
+      "customAgent": "自定义 Agent",
+      "customAgentDesc": "构建自定义创作角色",
+      "new": "新增"
+    },
+    "footer": {
+      "copyright": "ActioNow",
+      "contactLabel": "联系我们",
+      "rights": "© 2025 ActioNow Studio. All rights reserved.",
+      "tagline": "AI 驱动的影视创作平台"
+    }
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "出错了",
+    "retry": "重试",
+    "submit": "提交",
+    "cancel": "取消",
+    "confirm": "确认",
+    "or": "或"
+  },
+  "auth": {
+    "login": {
+      "title": "开机",
+      "subtitle": "欢迎回到片场，导演",
+      "tabs": {
+        "password": "暗号登录",
+        "code": "场记验证"
+      },
+      "account": "通行证",
+      "accountPlaceholder": "艺名 / 联络邮箱",
+      "password": "暗号",
+      "passwordPlaceholder": "请输入暗号",
+      "email": "联络方式",
+      "emailPlaceholder": "请输入邮箱",
+      "verifyCode": "场号",
+      "sendCode": "获取场号",
+      "forgotPassword": "忘记暗号",
+      "submit": "ACTION!",
+      "noAccount": "新人入组",
+      "register": "立即注册"
+    },
+    "register": {
+      "title": "入组登记",
+      "subtitle": "成为剧组一员，开启创作之旅",
+      "username": "艺名",
+      "usernamePlaceholder": "4-32位字符，字母开头",
+      "usernameHint": "将作为您在剧组的唯一标识",
+      "email": "联络方式",
+      "emailPlaceholder": "your@email.com",
+      "password": "暗号",
+      "passwordPlaceholder": "8-64位，含大小写字母和数字",
+      "confirmPassword": "确认暗号",
+      "confirmPasswordPlaceholder": "请再次输入暗号",
+      "nickname": "花名",
+      "nicknamePlaceholder": "您希望被如何称呼？",
+      "verifyCode": "场号",
+      "sendCode": "获取场号",
+      "inviteCode": "推荐函",
+      "inviteCodePlaceholder": "请输入推荐函编号（如有）",
+      "inviteCodeOptional": "选填",
+      "inviteCodeRequired": "必填",
+      "nicknameOptional": "选填",
+      "step1Label": "验证邮箱",
+      "step2Label": "账号设置",
+      "agreement": "我已阅读并同意",
+      "termsOfService": "服务条款",
+      "and": "和",
+      "privacyPolicy": "隐私政策",
+      "submit": "确认入组",
+      "nextStep": "继续",
+      "prevStep": "返回",
+      "hasAccount": "已入组？",
+      "login": "直接开机"
+    },
+    "forgotPassword": {
+      "title": "重置暗号",
+      "subtitle": "补拍一条，我们将发送场号到您的联络方式",
+      "email": "联络方式",
+      "emailPlaceholder": "请输入入组时使用的邮箱或手机号",
+      "verifyCode": "场号",
+      "sendCode": "获取场号",
+      "newPassword": "新暗号",
+      "newPasswordPlaceholder": "8-64位，含大小写字母和数字",
+      "confirmPassword": "确认新暗号",
+      "confirmPasswordPlaceholder": "请再次输入新暗号",
+      "submit": "重置暗号",
+      "codeSentTo": "验证码已发送至 {email}",
+      "backToLogin": "返回片场"
+    },
+    "oauth": {
+      "github": "GitHub 入组",
+      "google": "Google 入组",
+      "wechat": "微信入组",
+      "apple": "Apple 入组",
+      "processing": "正在登录...",
+      "callbackError": "登录失败",
+      "missingParams": "缺少OAuth提供商的必要参数",
+      "backToLogin": "返回登录"
+    },
+    "captcha": {
+      "title": "请完成安全验证",
+      "label": "图形验证码",
+      "placeholder": "请输入图中字符",
+      "refresh": "换一张",
+      "required": "请输入图形验证码",
+      "fetchError": "获取验证码失败",
+      "clickToRefresh": "点击刷新验证码",
+      "clickToLoad": "点击获取",
+      "imageAlt": "验证码"
+    },
+    "errors": {
+      "invalidEmail": "联络邮箱格式不正确",
+      "invalidPassword": "暗号需包含大小写字母和数字",
+      "passwordTooShort": "暗号长度至少8位",
+      "passwordTooLong": "暗号长度不能超过64位",
+      "passwordMismatch": "两次输入的暗号不一致",
+      "invalidUsername": "艺名需字母开头，仅含字母数字下划线",
+      "usernameTooShort": "艺名长度至少4位",
+      "usernameTooLong": "艺名长度不能超过32位",
+      "invalidVerifyCode": "场号格式不正确",
+      "agreementRequired": "请先同意服务条款和隐私政策",
+      "emailTaken": "该联络邮箱已被注册",
+      "usernameTaken": "该艺名已被使用",
+      "checkingEmail": "正在验证邮箱，请稍候"
+    },
+    "success": {
+      "loginSuccess": "开机成功，Action!",
+      "registerSuccess": "欢迎入组！",
+      "passwordResetSuccess": "暗号已更新，可以开机了",
+      "codeSent": "场号已发送"
+    }
+  },
+  "theme": {
+    "light": "日景",
+    "dark": "夜景",
+    "system": "跟随系统"
+  },
+  "monitor": {
+    "rec": "REC"
+  },
+  "invite": {
+    "title": "加入工作空间",
+    "loading": "加载邀请信息...",
+    "invitationNotFound": "邀请不存在",
+    "invitationExpired": "邀请已过期",
+    "invitationInvalid": "邀请无效",
+    "invitationDisabled": "邀请已禁用",
+    "invitationUsedUp": "邀请名额已用完",
+    "joinFailed": "加入失败",
+    "joinSuccess": "加入成功！",
+    "redirecting": "正在跳转到工作空间...",
+    "inviteToJoin": "邀请您加入工作空间",
+    "invitedAs": "您被邀请以 {role} 身份加入",
+    "inviteCode": "邀请码",
+    "role": "角色",
+    "remainingSlots": "剩余名额",
+    "validUntil": "有效期至",
+    "acceptAndJoin": "接受邀请并加入",
+    "loginToJoin": "登录后加入",
+    "registerNew": "注册新账号",
+    "autoFillCode": "注册时将自动填入邀请码",
+    "backToHome": "返回首页",
+    "roleAdmin": "管理员",
+    "roleMember": "成员",
+    "roleGuest": "访客"
+  },
+  "workspace": {
+    "nav": {
+      "inspiration": "灵感",
+      "projects": "项目",
+      "studio": "片场",
+      "assets": "素材室",
+      "tasks": "任务",
+      "director": "导演室",
+      "management": "片场管理",
+      "studioDisabledTooltip": "请先打开一个项目",
+      "menuAriaLabel": "菜单",
+      "userCenterAriaLabel": "用户中心",
+      "walletAvailable": "我的可用额度: {amount}",
+      "walletQuota": "我的配额剩余: {amount}",
+      "walletBalance": "工作空间余额: {amount}",
+      "walletViewDetail": "点击查看详情"
+    },
+    "inspiration": {
+      "title": "灵感创作",
+      "empty": "开始你的灵感创作",
+      "emptyHint": "自由生成图片、视频、音频，无需关联项目",
+      "quickTemplate": {
+        "portrait": "写实人像",
+        "landscape": "风景插画",
+        "character": "动漫角色",
+        "concept": "概念设计"
+      },
+      "session": {
+        "new": "新建会话",
+        "delete": "删除会话",
+        "archive": "归档",
+        "defaultTitle": "未命名灵感",
+        "searchPlaceholder": "搜索会话...",
+        "empty": "暂无会话",
+        "confirmDelete": "确定要删除此会话？所有生成记录将被移除。",
+        "autoTitle": "我的灵感"
+      },
+      "input": {
+        "placeholder": "描述你想要生成的内容...",
+        "generate": "生成",
+        "optimize": "优化提示词",
+        "generating": "生成中...",
+        "optimizing": "优化中...",
+        "addReference": "添加参考素材",
+        "refNotSupported": "当前模型不支持此类型参考素材",
+        "style": "风格",
+        "noStyle": "无风格",
+        "styleTooltip": "选择画面风格",
+        "advancedParams": "高级参数",
+        "uploadFailed": "素材上传失败"
+      },
+      "record": {
+        "pending": "排队中",
+        "running": "生成中",
+        "completed": "已完成",
+        "failed": "生成失败",
+        "retry": "重试",
+        "delete": "删除",
+        "download": "下载",
+        "saveToAssets": "收藏到素材库",
+        "savedToAssets": "已收藏到素材库"
+      },
+      "type": {
+        "image": "图片",
+        "video": "视频",
+        "audio": "音频"
+      }
+    },
+    "switcher": {
+      "title": "切换剧组",
+      "create": "创建新剧组",
+      "noWorkspaces": "暂无剧组"
+    },
+    "create": {
+      "title": "创建剧组",
+      "subtitle": "创建一个新的剧组来开始你的创作之旅",
+      "name": "剧组名称",
+      "namePlaceholder": "输入剧组名称",
+      "description": "剧组简介",
+      "descriptionPlaceholder": "简单介绍一下你的剧组（选填）",
+      "submit": "创建剧组",
+      "success": "剧组创建成功"
+    },
+    "director": {
+      "sidebar": {
+        "profile": "个人中心",
+        "studioManagement": "片场管理"
+      },
+      "profile": {
+        "title": "个人中心",
+        "security": "安全设置",
+        "nickname": "花名",
+        "email": "联络邮箱",
+        "changePassword": "修改暗号",
+        "bindEmail": "绑定邮箱",
+        "bindPhone": "绑定手机",
+        "oauthBindings": "第三方账号"
+      },
+      "studioManagement": {
+        "title": "片场管理",
+        "members": "成员管理",
+        "settings": "剧组设置",
+        "wallet": "钱包管理",
+        "aiAdmin": "系统管理"
+      }
+    },
+    "management": {
+      "sidebar": {
+        "title": "片场管理",
+        "members": "成员与权限",
+        "wallet": "钱包管理",
+        "settings": "剧组设置",
+        "skills": "技能管理",
+        "aiAdmin": "系统管理"
+      },
+      "permissions": {
+        "title": "权限管理",
+        "description": "管理剧本维度的访问权限",
+        "ownerProtected": "剧本创建者的权限不可撤销",
+        "cancel": "取消",
+        "expired": "已过期"
+      }
+    },
+    "projects": {
+      "title": "项目",
+      "empty": "暂无项目",
+      "refresh": "刷新",
+      "searchPlaceholder": "搜索剧本...",
+      "status": {
+        "all": "全部",
+        "draft": "草稿",
+        "inProgress": "制作中",
+        "completed": "已完成",
+        "archived": "已归档"
+      },
+      "filter": {
+        "onlyMine": "只看我的"
+      },
+      "sort": {
+        "label": "排序",
+        "updatedAt": "更新时间",
+        "createdAt": "创建时间",
+        "title": "标题",
+        "desc": "降序",
+        "asc": "升序"
+      },
+      "newProject": {
+        "title": "立即创建项目，开拍！",
+        "subtitle": "选择一种方式开始创作",
+        "create": "新建项目",
+        "import": "导入项目文档"
+      },
+      "card": {
+        "episodes": "{count} 集",
+        "version": "版本 {number}",
+        "createdBy": "由 {name} 创建于 {date}",
+        "more": "更多",
+        "edit": "创作",
+        "duplicate": "复制",
+        "delete": "删除",
+        "archive": "归档"
+      },
+      "createModal": {
+        "title": "新建项目",
+        "projectTitle": "剧本标题",
+        "projectTitlePlaceholder": "输入剧本标题",
+        "synopsis": "剧本简介",
+        "synopsisPlaceholder": "简单描述一下你的剧本（选填）",
+        "submit": "创建",
+        "success": "项目创建成功"
+      },
+      "deleteModal": {
+        "title": "删除项目",
+        "message": "确定要删除「{title}」吗？此操作不可恢复。",
+        "confirm": "删除",
+        "success": "项目已删除"
+      },
+      "noDescription": "暂无简介",
+      "copyTitle": "{title} (副本)",
+      "loadingMore": "加载中...",
+      "scrollToLoadMore": "向下滚动加载更多",
+      "allLoaded": "已加载全部 {total} 个项目",
+      "tips": {
+        "gettingStarted": {
+          "title": "创建你的第一个项目",
+          "description": "从创建项目开始 — 你的 AI 创作团队将协助你完成剧本、分镜等创作。",
+          "action": "创建项目",
+          "spotlightDescription": "点击按钮，创建你的第一个项目",
+          "gotIt": "知道了"
+        }
+      }
+    },
+    "studio": {
+      "title": "片场",
+      "empty": "暂无内容",
+      "scriptPanel": "剧本管理",
+      "tabs": {
+        "details": "详情",
+        "episodes": "剧集",
+        "storyboards": "分镜",
+        "characters": "角色",
+        "scenes": "场景",
+        "props": "道具",
+        "assets": "素材"
+      },
+      "status": {
+        "draft": "草稿",
+        "inProgress": "进行中",
+        "completed": "已完成",
+        "archived": "已归档",
+        "generating": "生成中",
+        "failed": "失败"
+      },
+      "common": {
+        "noData": "暂无数据",
+        "confirmDelete": "确认删除",
+        "confirmDeleteMessage": "确定要删除 \"{title}\" 吗？此操作无法撤销。",
+        "delete": "删除",
+        "cancel": "取消",
+        "edit": "编辑",
+        "copy": "复制",
+        "refresh": "刷新",
+        "search": "搜索",
+        "generating": "生成中...",
+        "generateFailed": "生成失败",
+        "collapseList": "收起列表",
+        "drag": "拖拽",
+        "favorite": "收藏",
+        "download": "下载",
+        "regenerate": "重新生成",
+        "unavailable": "暂时不可用",
+        "uploadCover": "上传封面",
+        "uploading": "上传中...",
+        "noCover": "暂无封面",
+        "viewComments": "查看评论",
+        "assetType": {
+          "image": "图片",
+          "video": "视频",
+          "audio": "音频",
+          "document": "文档",
+          "other": "其他"
+        },
+        "voice": "音色",
+        "voiceAmbient": "环境音",
+        "voiceSfx": "音效",
+        "setVoice": "设置音色",
+        "removeVoice": "移除音色",
+        "noVoice": "暂无音色",
+        "uploadAudio": "上传音频",
+        "selectAudio": "选择音频",
+        "relatedAudio": "关联音频",
+        "unattachedAudio": "游离音频",
+        "voiceSet": "音色已设置",
+        "voiceRemoved": "音色已移除",
+        "voiceSetFailed": "设置音色失败",
+        "voiceRemoveFailed": "移除音色失败"
+      },
+      "editing": {
+        "isEditing": "正在编辑...",
+        "viewReadOnly": "只读查看",
+        "refreshStatus": "刷新状态",
+        "forceEdit": "强制编辑",
+        "lockedDuration": "已锁定 {duration}",
+        "lockTimeout": "锁定已超过 {minutes} 分钟"
+      },
+      "asset": {
+        "generationStatus": {
+          "generating": "生成中...",
+          "failed": "生成失败",
+          "draft": "草稿"
+        },
+        "relativeTime": {
+          "today": "今天",
+          "yesterday": "昨天",
+          "daysAgo": "{days}天前",
+          "weeksAgo": "{weeks}周前",
+          "monthsAgo": "{months}月前"
+        },
+        "detail": {
+          "name": "名称",
+          "description": "描述",
+          "namePlaceholder": "输入素材名称",
+          "descriptionPlaceholder": "输入素材描述",
+          "noDescription": "暂无描述",
+          "refreshData": "刷新数据",
+          "save": "保存",
+          "cancel": "取消",
+          "aiGeneratedLabel": "AI生成",
+          "aiGenerationParams": "AI生成参数",
+          "paramPrompt": "提示词",
+          "paramImageSize": "图片尺寸",
+          "paramAspectRatio": "宽高比",
+          "paramGenerationType": "生成类型",
+          "entityType": {
+            "CHARACTER": "角色",
+            "SCENE": "场景",
+            "PROP": "道具",
+            "STORYBOARD": "分镜",
+            "ASSET": "素材",
+            "SCRIPT": "剧本",
+            "EPISODE": "分集",
+            "STYLE": "风格"
+          },
+          "providerNotFound": "未知供应商",
+          "saveSuccess": "素材信息已保存",
+          "saveFailed": "保存失败"
+        },
+        "card": {
+          "preview": "预览",
+          "download": "下载",
+          "setDraft": "设为草稿",
+          "setOfficial": "设为发布",
+          "delete": "删除",
+          "confirmDelete": "确认删除",
+          "confirmDeleteMessage": "确定要删除素材 \"{name}\" 吗？此操作无法撤销。",
+          "cancel": "取消",
+          "noAssets": "暂无素材",
+          "uploadAsset": "上传素材"
+        },
+        "section": {
+          "totalCount": "{count} 个素材",
+          "imageLabel": "图片",
+          "videoLabel": "视频",
+          "audioLabel": "音频",
+          "dragHint": "可拖拽到AI生成",
+          "moreImages": "+{count} 张图片",
+          "moreVideos": "+{count} 个视频",
+          "moreAudios": "+{count} 个音频"
+        },
+        "tab": {
+          "noAssets": "暂无素材",
+          "loadFailed": "加载素材失败",
+          "reload": "重新加载",
+          "filterAll": "全部",
+          "searchPlaceholder": "搜索素材...",
+          "selectedCount": "已选 {count} 项",
+          "restore": "恢复",
+          "emptyTrash": "清空",
+          "clearFailed": "清除失败 ({count})",
+          "clearFailedTooltip": "一键清除所有生成失败的素材",
+          "trashLabel": "回收站",
+          "assetsLabel": "素材",
+          "selectEntity": "选择实体",
+          "noUnattached": "没有游离素材",
+          "noUnattachedDesc": "所有素材都已关联到实体"
+        },
+        "trash": {
+          "emptyTitle": "回收站为空",
+          "emptyDescription": "删除的素材将在这里保留 30 天",
+          "daysLeft": "{days}天",
+          "deletedTime": "{time} 删除",
+          "daysUntilDeletion": "{days}天后删除",
+          "emptyTrashTitle": "清空回收站",
+          "emptyTrashMessage": "确定要永久删除回收站中的所有 {count} 个文件吗？此操作无法撤销。",
+          "permanentDeleteTitle": "永久删除",
+          "permanentDeleteMessage": "确定要永久删除此文件吗？此操作无法撤销。",
+          "confirmDelete": "确认删除",
+          "restoreSuccess": "素材已恢复",
+          "restoreFailed": "恢复失败",
+          "deleteSuccess": "素材已永久删除",
+          "deleteFailed": "删除失败",
+          "emptySuccess": "回收站已清空",
+          "emptyFailed": "清空回收站失败"
+        }
+      }
+    },
+    "agent": {
+      "title": "AI助手",
+      "empty": "有什么需要帮忙的？",
+      "emptyHint": "告诉我你的想法，我可以帮你分析剧本、设计角色、规划分镜或给出创作建议",
+      "inputPlaceholder": "输入消息，按Enter发送...",
+      "newSession": "新建会话",
+      "archiveSession": "归档会话",
+      "deleteSession": "删除会话",
+      "defaultTitle": "咔咔",
+      "generating": "生成中",
+      "aiGeneration": "AI 生成",
+      "enterToSend": "Enter 发送 · Shift+Enter 换行",
+      "sendMessage": "发送消息",
+      "cancelGeneration": "停止本轮思考",
+      "draftWhileGenerating": "正在回复中，可继续编辑下一条草稿",
+      "sendBlockedUploading": "附件仍在上传，完成后即可发送",
+      "thinkingProcess": "思考过程",
+      "responseStreaming": "正在组织回复",
+      "thinkingInProgress": "咔咔思考中。。。",
+      "generatingInProgress": "咔咔思考中。。。",
+      "generationFailed": "生成失败",
+      "cancel": "取消",
+      "cancelled": "已取消",
+      "copied": "已复制",
+      "copy": "复制",
+      "showPlainText": "显示纯文本",
+      "showMarkdown": "显示 Markdown",
+      "responseTime": "响应耗时",
+      "toolCallCount": "工具调用次数",
+      "totalTokens": "总计 {count} tokens",
+      "retryMessage": "重试",
+      "noSessions": "暂无会话",
+      "loadMore": "加载更多",
+      "totalSessions": "共 {count} 个会话",
+      "messageCount": "{count} 条消息",
+      "deleteConfirmTitle": "删除会话",
+      "deleteConfirmMessage": "确定要删除此会话吗？此操作不可恢复。",
+      "archiveConfirmTitle": "归档会话",
+      "archiveConfirmMessage": "确定要归档此会话吗？",
+      "toolCallLabel": "工具调用",
+      "toolCallRunning": "还有 {count} 个工具执行中",
+      "toolCallCompleted": "工具调用已完成",
+      "toolCallGeneral": "通用工具",
+      "toolCallSummarySingle": "已调用 {tool} 工具",
+      "toolCallSummaryMultiple": "已调用 {first}、{second} 等 {count} 个工具",
+      "loadEarlier": "加载更早的消息",
+      "refreshMessages": "刷新消息",
+      "loadMessagesFailed": "加载消息失败，请稍后重试",
+      "messageSyncError": "消息同步异常，请刷新重试",
+      "cancelCascadedAsks": "已同时取消 {count} 个待回答的问题",
+      "staleGenerationHint": "已超过 15 秒未收到服务端事件，任务可能仍在运行中",
+      "messageNav": "消息导航",
+      "messageNavShortcut": "Ctrl/Cmd+Shift+J",
+      "sessionGeneratingHint": "当前会话仍在思考中，可继续编辑草稿或切换查看其他会话",
+      "sessionContinuesInBackground": "已切换会话，上一轮思考会继续在后台完成",
+      "focusComposerShortcut": "Ctrl/Cmd+K 聚焦输入框",
+      "dismissPanelsHint": "Esc 关闭面板",
+      "quickInput": {
+        "scriptParse": "剧本快速解析",
+        "scriptParseMsg": "请帮我快速解析这个剧本的整体结构、主题和核心冲突",
+        "episodeParse": "剧集解析",
+        "episodeParseMsg": "请分析当前剧集的情节发展、角色弧线和戏剧张力",
+        "characterAnalysis": "角色分析",
+        "characterAnalysisMsg": "请分析剧本中的主要角色，包括性格特点、动机和人物关系",
+        "sceneOptimize": "场景优化",
+        "sceneOptimizeMsg": "请帮我优化当前场景的描写，使其更具画面感和戏剧性",
+        "dialoguePolish": "对白润色",
+        "dialoguePolishMsg": "请帮我润色对白，使其更自然、更符合角色性格",
+        "creativeSuggestion": "创意建议",
+        "creativeSuggestionMsg": "请基于当前剧本给我一些创意建议和改进方向"
+      },
+      "mention": {
+        "searchPlaceholder": "搜索实体...",
+        "character": "角色",
+        "scene": "场景",
+        "prop": "道具",
+        "style": "风格",
+        "episode": "剧集",
+        "storyboard": "分镜",
+        "noResults": "无匹配结果",
+        "loading": "加载中...",
+        "linked": "已关联"
+      },
+      "addAttachment": "添加附件",
+      "removeAttachment": "移除",
+      "uploading": "上传中...",
+      "uploadFailed": "上传失败",
+      "fileTooLarge": "文件过大（最大{max}MB）",
+      "tooManyFiles": "最多{max}个附件",
+      "totalSizeTooLarge": "总大小超限（最大{max}MB）",
+      "retryUpload": "重试",
+      "dropToAttach": "拖放以添加附件",
+      "scrollToBottom": "回到底部",
+      "regenerate": "重新生成",
+      "unsupportedFileType": "不支持的文件类型",
+      "sessionCreateFailed": "创建会话失败",
+      "sessionDeleteFailed": "删除会话失败",
+      "sessionArchiveFailed": "归档会话失败",
+      "searchSessions": "搜索会话...",
+      "selectedAgent": "当前 Agent",
+      "selectAgent": "选择 Agent",
+      "noAvailableAgents": "暂无可直接建会话的 Agent",
+      "sessionCreateNoAgent": "当前工作空间没有可直接创建会话的 Agent",
+      "skill": {
+        "label": "技能",
+        "tooltip": "选择技能",
+        "noSkills": "暂无可用技能",
+        "clear": "清除技能",
+        "clearAll": "清除全部",
+        "scopeSystem": "系统",
+        "scopeWorkspace": "工作空间",
+        "customized": "已定制",
+        "activeSkills": "激活中",
+        "addSkill": "添加技能"
+      },
+      "ask": {
+        "submit": "提交",
+        "dismiss": "放弃",
+        "answered": "已回答",
+        "cancelled": "已取消",
+        "timedOut": "已超时",
+        "confirmYes": "确认",
+        "confirmNo": "取消",
+        "minSelect": "至少选择 {n} 项",
+        "maxSelect": "最多选择 {n} 项",
+        "textTooShort": "至少 {n} 个字符",
+        "textTooLong": "最多 {n} 个字符",
+        "numberRequired": "请输入数字",
+        "numberOutOfRange": "需介于 {min} 与 {max} 之间",
+        "choiceRequired": "请选择一项",
+        "textPlaceholder": "输入你的回答…",
+        "yourAnswer": "你的回答：{value}",
+        "countdownRemaining": "剩余 {time}"
+      },
+      "status": {
+        "skillLoading": "加载技能…",
+        "ragRetrieval": "检索上下文…",
+        "llmInvoking": "调用模型…",
+        "toolBatchProgress": "执行工具…",
+        "missionStep": "任务步骤…",
+        "preflight": "预检中…",
+        "contextPreparing": "准备上下文…",
+        "generic": "处理中…"
+      }
+    },
+    "materialRoom": {
+      "title": "公共资源库",
+      "sidebar": {
+        "characters": "角色",
+        "scenes": "场景",
+        "props": "道具",
+        "assets": "素材",
+        "styles": "风格",
+        "skills": "技能"
+      },
+      "scope": {
+        "all": "全部",
+        "workspace": "工作空间",
+        "script": "剧本",
+        "system": "系统"
+      },
+      "searchPlaceholder": "搜索资源...",
+      "empty": "暂无公共资源",
+      "emptyHint": "公共资源库中还没有已发布的资源",
+      "refresh": "刷新",
+      "card": {
+        "more": "更多",
+        "edit": "编辑",
+        "delete": "删除",
+        "copy": "复制到工作空间",
+        "copying": "复制中...",
+        "noDescription": "暂无描述"
+      },
+      "source": {
+        "label": "来源",
+        "all": "全部",
+        "public": "系统",
+        "workspace": "剧组",
+        "script": "剧本",
+        "selectScript": "选择剧本",
+        "noScripts": "暂无剧本"
+      },
+      "sort": {
+        "label": "排序",
+        "publishedAt": "发布时间",
+        "createdAt": "创建时间",
+        "name": "名称"
+      },
+      "copySuccess": "已复制到工作空间",
+      "copyFailed": "复制失败",
+      "preview": {
+        "title": "资源详情",
+        "publishedAt": "发布时间",
+        "publishNote": "发布说明",
+        "characterType": "角色类型",
+        "gender": "性别",
+        "age": "年龄",
+        "sceneType": "场景类型",
+        "propType": "道具类型",
+        "assetType": "素材类型",
+        "fileSize": "文件大小",
+        "mimeType": "文件格式",
+        "noPublishNote": "无"
+      },
+      "assetType": {
+        "IMAGE": "图片",
+        "VIDEO": "视频",
+        "AUDIO": "音频",
+        "DOCUMENT": "文档",
+        "MODEL": "模型",
+        "OTHER": "其他"
+      },
+      "create": {
+        "character": "新增角色",
+        "scene": "新增场景",
+        "prop": "新增道具",
+        "style": "新增风格",
+        "asset": "上传素材",
+        "title": "新增素材",
+        "name": "名称",
+        "namePlaceholder": "输入名称",
+        "description": "描述",
+        "descriptionPlaceholder": "输入描述（选填）",
+        "characterType": "角色类型",
+        "gender": "性别",
+        "age": "年龄",
+        "agePlaceholder": "输入年龄",
+        "propType": "道具类型",
+        "fixedDesc": "固定提示词",
+        "fixedDescPlaceholder": "如：ghibli style, watercolor, soft lighting",
+        "artDirection": "艺术方向",
+        "artDirectionPlaceholder": "如：Studio Ghibli inspired, warm palette",
+        "coverUpload": "封面图片",
+        "coverUploadHint": "点击上传封面（选填，≤100MB）",
+        "coverUploading": "上传中...",
+        "uploadFile": "选择文件",
+        "uploadFileHint": "点击或拖拽文件上传（≤100MB）",
+        "fileUploading": "文件上传中...",
+        "fileSelected": "已选择：{name}",
+        "submit": "创建",
+        "cancel": "取消"
+      },
+      "deleteModal": {
+        "title": "删除确认",
+        "message": "确定要删除「{name}」吗？此操作不可恢复。",
+        "confirm": "删除"
+      },
+      "detail": {
+        "basicInfo": "基本信息",
+        "appearance": "外观特征",
+        "environment": "环境设定",
+        "atmosphere": "氛围描述",
+        "clickToExpand": "点击展开",
+        "save": "保存",
+        "cancel": "取消",
+        "cover": "封面图",
+        "uploadCover": "上传封面",
+        "removeCover": "移除封面",
+        "name": "名称",
+        "namePlaceholder": "输入名称",
+        "description": "描述",
+        "descriptionPlaceholder": "输入描述",
+        "characterType": "角色类型",
+        "gender": "性别",
+        "age": "年龄",
+        "propType": "道具类型",
+        "saveSuccess": "保存成功",
+        "saveFailed": "保存失败",
+        "uploadFailed": "上传失败",
+        "coverTooLarge": "封面图片不能超过 10MB",
+        "styleReadonly": "风格目前为只读模式",
+        "fileInfo": "文件信息",
+        "assetType": "素材类型",
+        "fileSize": "文件大小",
+        "character": {
+          "height": "身高",
+          "heightPlaceholder": "如: 175cm",
+          "bodyType": "体型",
+          "bodyTypePlaceholder": "如: 苗条、健壮",
+          "skinTone": "肤色",
+          "skinTonePlaceholder": "如: 白皙、小麦色",
+          "faceShape": "脸型",
+          "faceShapePlaceholder": "如: 瓜子脸、方脸",
+          "eyeShape": "眼形",
+          "eyeShapePlaceholder": "如: 杏眼、丹凤眼",
+          "eyeColor": "眼睛颜色",
+          "eyeColorPlaceholder": "如: 黑色、棕色",
+          "hairStyle": "发型",
+          "hairStylePlaceholder": "如: 长发、短发、马尾",
+          "hairLength": "发长",
+          "hairLengthPlaceholder": "如: 及腰、齐肩",
+          "hairColor": "发色",
+          "hairColorPlaceholder": "如: 黑色、栗色",
+          "artStyle": "画风",
+          "artStylePlaceholder": "如: 写实、动漫",
+          "typePROTAGONIST": "主角",
+          "typeANTAGONIST": "反派",
+          "typeSUPPORTING": "配角",
+          "typeBACKGROUND": "路人",
+          "genderMALE": "男",
+          "genderFEMALE": "女",
+          "genderOTHER": "其他"
+        },
+        "scene": {
+          "location": "地点",
+          "locationPlaceholder": "如: 室内、室外、城市",
+          "timeOfDay": "时间",
+          "timeOfDayPlaceholder": "如: 清晨、正午、黄昏",
+          "weather": "天气",
+          "weatherPlaceholder": "如: 晴朗、阴天、雨天",
+          "season": "季节",
+          "seasonPlaceholder": "如: 春、夏、秋、冬",
+          "temperature": "温度",
+          "temperaturePlaceholder": "如: 炎热、温暖、寒冷",
+          "lighting": "光线",
+          "lightingPlaceholder": "如: 明亮、昏暗、柔和",
+          "mood": "情绪",
+          "moodPlaceholder": "如: 紧张、温馨、神秘",
+          "ambiance": "氛围",
+          "ambiancePlaceholder": "如: 安静、喧闹、庄严",
+          "soundscape": "声音环境",
+          "soundscapePlaceholder": "如: 鸟鸣、交通声、寂静"
+        },
+        "prop": {
+          "size": "尺寸",
+          "sizePlaceholder": "如: 小型、中型、大型",
+          "material": "材质",
+          "materialPlaceholder": "如: 金属、木头、塑料",
+          "color": "颜色",
+          "colorPlaceholder": "如: 红色、黑色、银色",
+          "style": "风格",
+          "stylePlaceholder": "如: 现代、古典、科幻",
+          "condition": "状态",
+          "conditionPlaceholder": "如: 全新、老旧、破损",
+          "details": "细节特征",
+          "detailsPlaceholder": "如: 雕花、磨损痕迹",
+          "typeWEAPON": "武器",
+          "typeVEHICLE": "载具",
+          "typeFURNITURE": "家具",
+          "typeCLOTHING": "服装",
+          "typeFOOD": "食物",
+          "typeTOOL": "工具",
+          "typeDEVICE": "设备",
+          "typeOTHER": "其他"
+        }
+      },
+      "admin": {
+        "create": "新增",
+        "publish": "发布",
+        "unpublish": "取消发布",
+        "published": "已发布",
+        "unpublished": "未发布",
+        "publishSuccess": "发布成功",
+        "unpublishSuccess": "已取消发布",
+        "publishFailed": "发布失败",
+        "unpublishFailed": "取消发布失败"
+      },
+      "loadMore": "向下滚动加载更多",
+      "loadedAll": "已加载全部 {count} 个资源",
+      "loading": "加载中...",
+      "tips": {
+        "browseLibrary": {
+          "title": "探索素材库",
+          "description": "浏览共享的角色、场景、道具和风格素材，或创建你自己的创作素材库。",
+          "spotlightDescription": "切换来源，浏览公共库、片场或项目中的素材",
+          "spotlightDescriptionAdmin": "点击按钮，向素材库中添加新素材",
+          "gotIt": "知道了"
+        }
+      },
+      "skills": {
+        "title": "技能管理",
+        "description": "管理工作空间中的自定义技能",
+        "empty": "暂无技能",
+        "searchPlaceholder": "搜索技能...",
+        "createSkill": "新建技能",
+        "cancel": "取消",
+        "close": "关闭",
+        "scope": {
+          "SYSTEM": "系统",
+          "WORKSPACE": "工作空间"
+        },
+        "status": {
+          "enabled": "已启用",
+          "disabled": "已禁用",
+          "enable": "启用",
+          "disable": "禁用"
+        },
+        "column": {
+          "name": "名称",
+          "description": "描述",
+          "scope": "来源",
+          "status": "状态",
+          "version": "版本",
+          "actions": "操作",
+          "view": "查看"
+        },
+        "create": {
+          "title": "新建技能",
+          "nameLabel": "技能名称",
+          "namePlaceholder": "字母、数字和下划线",
+          "nameHint": "技能名称用于在对话中引用，创建后不可更改",
+          "displayNameLabel": "显示名称",
+          "displayNamePlaceholder": "用户可见的名称（可选）",
+          "descriptionLabel": "描述",
+          "descriptionPlaceholder": "简要描述该技能的用途",
+          "contentLabel": "技能内容",
+          "contentPlaceholder": "输入技能的提示词或指令...",
+          "tagsLabel": "标签",
+          "tagsPlaceholder": "用逗号分隔多个标签",
+          "submit": "创建",
+          "success": "技能创建成功",
+          "failed": "技能创建失败"
+        },
+        "edit": {
+          "title": "编辑技能",
+          "submit": "保存",
+          "success": "技能更新成功",
+          "failed": "技能更新失败"
+        },
+        "delete": {
+          "title": "删除技能",
+          "message": "确定要删除技能「{name}」吗？此操作无法撤销。",
+          "confirm": "删除",
+          "success": "技能已删除",
+          "failed": "技能删除失败"
+        },
+        "toggle": {
+          "success": "状态更新成功",
+          "failed": "状态更新失败"
+        },
+        "upload": {
+          "label": "上传技能包",
+          "tooltip": "上传 ZIP 包批量导入技能",
+          "success": "导入成功：{success}/{total} 个技能",
+          "partialSuccess": "部分导入成功：{success}/{total} 个技能",
+          "failed": "技能导入失败"
+        },
+        "view": {
+          "nameLabel": "技能名称"
+        },
+        "pagination": {
+          "total": "共 {total} 个",
+          "prev": "上一页",
+          "current": "第 {page} 页",
+          "next": "下一页"
+        }
+      }
+    },
+    "taskCenter": {
+      "pageTitle": "任务中心",
+      "credits": "积分",
+      "cancel": "取消",
+      "retry": "重试",
+      "close": "关闭",
+      "refresh": "刷新",
+      "searchPlaceholder": "搜索任务...",
+      "emptyState": "暂无任务。提交一个 AI 生成任务即可开始。",
+      "loadedAll": "已加载全部 {count} 个任务",
+      "status": {
+        "pending": "等待中",
+        "queued": "排队中",
+        "running": "运行中",
+        "completed": "已完成",
+        "failed": "失败",
+        "cancelled": "已取消"
+      },
+      "stats": {
+        "total": "总计",
+        "running": "运行中",
+        "completed": "已完成",
+        "failed": "失败",
+        "successRate": "成功率"
+      },
+      "filter": {
+        "all": "全部",
+        "running": "运行中",
+        "completed": "已完成",
+        "failed": "失败",
+        "cancelled": "已取消"
+      },
+      "tracker": {
+        "title": "活跃任务",
+        "expand": "显示活跃任务",
+        "collapse": "收起活跃任务",
+        "viewAll": "查看全部任务 →"
+      },
+      "detail": {
+        "title": "任务详情",
+        "progress": "进度",
+        "type": "类型",
+        "creditCost": "积分消耗",
+        "duration": "耗时",
+        "timeline": "时间线",
+        "retryInfo": "重试次数",
+        "priority": "优先级",
+        "errorTitle": "错误信息",
+        "creator": "创建者",
+        "script": "剧本",
+        "provider": "模型提供商",
+        "createdAt": "创建时间",
+        "startedAt": "开始时间",
+        "completedAt": "完成时间",
+        "inputParams": "输入参数",
+        "outputResult": "输出结果",
+        "source": "来源",
+        "entityType": "实体类型",
+        "generationType": "生成类型",
+        "openImage": "查看原图",
+        "queuePosition": "队列位置：第 {position} 位",
+        "notFound": "未找到该任务"
+      },
+      "retryCount": "重试 {count}/{max}",
+      "column": {
+        "title": "任务",
+        "entityType": "实体类型",
+        "type": "任务类型",
+        "model": "模型",
+        "source": "来源",
+        "status": "状态",
+        "createdAt": "创建时间",
+        "duration": "耗时",
+        "actions": "操作"
+      },
+      "toast": {
+        "taskCompleted": "任务完成",
+        "taskFailed": "任务失败"
+      }
+    },
+    "missions": {
+      "tab": "任务序列",
+      "empty": "暂无任务序列",
+      "cancel": "取消",
+      "status": {
+        "CREATED": "已创建",
+        "EXECUTING": "执行中",
+        "WAITING": "等待中",
+        "COMPLETED": "已完成",
+        "FAILED": "失败",
+        "CANCELLED": "已取消"
+      },
+      "step": {
+        "AGENT_INVOKE": "Agent 步骤",
+        "WAIT_TASKS": "等待任务"
+      },
+      "stepStatus": {
+        "PENDING": "待执行",
+        "RUNNING": "执行中",
+        "COMPLETED": "已完成",
+        "FAILED": "失败"
+      },
+      "column": {
+        "title": "序列名称",
+        "status": "状态",
+        "progress": "进度",
+        "steps": "步骤",
+        "credit": "积分",
+        "startedAt": "开始时间"
+      },
+      "detail": {
+        "title": "序列详情",
+        "goal": "目标",
+        "steps": "执行步骤",
+        "creditCost": "已消耗积分",
+        "currentActivity": "当前活动",
+        "pendingTasks": "待处理任务",
+        "progress": "进度"
+      },
+      "panel": {
+        "title": "序列执行中",
+        "expand": "展开详情",
+        "collapse": "收起详情",
+        "dismiss": "关闭"
+      }
+    },
+    "batchJobs": {
+      "tab": "批量作业",
+      "empty": "暂无批量作业",
+      "status": {
+        "CREATED": "已创建",
+        "RUNNING": "运行中",
+        "PAUSED": "已暂停",
+        "COMPLETED": "已完成",
+        "FAILED": "失败",
+        "CANCELLED": "已取消"
+      },
+      "batchType": {
+        "SIMPLE": "简单批量",
+        "PIPELINE": "流水线",
+        "VARIATION": "变体生成",
+        "SCOPE": "范围生成",
+        "AB_TEST": "A/B 测试"
+      },
+      "column": {
+        "title": "作业名称",
+        "status": "状态",
+        "progress": "进度",
+        "items": "子项",
+        "credits": "积分",
+        "createdAt": "创建时间"
+      },
+      "filter": {
+        "allStatus": "全部状态",
+        "allType": "全部类型"
+      },
+      "action": {
+        "cancel": "取消",
+        "pause": "暂停",
+        "resume": "恢复",
+        "retryFailed": "重试失败项"
+      },
+      "detail": {
+        "title": "批量作业详情",
+        "items": "子项",
+        "progress": "进度",
+        "summary": "摘要",
+        "totalItems": "总数",
+        "completedItems": "已完成",
+        "failedItems": "失败",
+        "skippedItems": "已跳过",
+        "estimatedCredits": "预估积分",
+        "actualCredits": "实际积分",
+        "startedAt": "开始时间",
+        "completedAt": "完成时间",
+        "concurrency": "并发数",
+        "errorStrategy": "错误策略",
+        "provider": "模型提供商",
+        "source": "来源"
+      },
+      "itemStatus": {
+        "PENDING": "等待中",
+        "SUBMITTED": "已提交",
+        "RUNNING": "运行中",
+        "COMPLETED": "已完成",
+        "FAILED": "失败",
+        "SKIPPED": "已跳过",
+        "CANCELLED": "已取消"
+      },
+      "toast": {
+        "cancelSuccess": "批量作业已取消",
+        "cancelFailed": "取消失败",
+        "pauseSuccess": "批量作业已暂停",
+        "pauseFailed": "暂停失败",
+        "resumeSuccess": "批量作业已恢复",
+        "resumeFailed": "恢复失败",
+        "retrySuccess": "已重试失败项",
+        "retryFailed": "重试失败"
+      },
+      "loadedAll": "已加载全部 {count} 个批量作业",
+      "source": {
+        "API": "手动创建",
+        "AGENT": "Agent 创建",
+        "SCHEDULED": "定时任务"
+      },
+      "errorStrategy": {
+        "CONTINUE": "继续",
+        "STOP": "停止",
+        "RETRY_THEN_CONTINUE": "重试后继续"
+      }
+    },
+    "pipeline": {
+      "title": "Pipeline 模板管理",
+      "description": "查看和配置预定义 Pipeline 模板的步骤及默认 Provider",
+      "step": {
+        "provider": "步骤 Provider",
+        "type": {
+          "GENERATE_TEXT": "文本生成",
+          "GENERATE_IMAGE": "图片生成",
+          "GENERATE_VIDEO": "视频生成",
+          "GENERATE_AUDIO": "音频生成",
+          "GENERATE_TTS": "语音合成"
+        }
+      },
+      "selectProvider": "选择 Provider",
+      "launchJob": "使用此模板",
+      "launchModal": {
+        "title": "发起 Pipeline 作业",
+        "jobName": "作业名称",
+        "jobNamePlaceholder": "输入作业名称（可选）",
+        "scriptId": "剧本 ID",
+        "scriptIdPlaceholder": "输入剧本 ID",
+        "inputMode": "实体输入方式",
+        "inputModeManual": "手动输入",
+        "inputModeScope": "范围展开",
+        "scopeEntityType": "范围类型",
+        "scopeEntityId": "范围实体 ID",
+        "scopeEntityIdPlaceholder": "输入范围实体 ID",
+        "manualItems": "实体列表 (JSON)",
+        "manualItemsPlaceholder": "[{\"entityType\":\"EPISODE\",\"entityId\":\"...\",\"entityName\":\"...\"}]",
+        "concurrency": "并发数",
+        "errorStrategy": "错误策略",
+        "errorStrategyContinue": "继续",
+        "errorStrategyStop": "停止",
+        "errorStrategyRetry": "重试后继续",
+        "stepProviderOverride": "步骤 {step} Provider 覆盖",
+        "submit": "提交作业",
+        "submitting": "提交中...",
+        "submitSuccess": "Pipeline 作业已提交",
+        "submitFailed": "提交失败"
+      },
+      "providerSaved": "Provider 已保存",
+      "providerSaveFailed": "Provider 保存失败",
+      "history": {
+        "title": "Pipeline 作业历史",
+        "filterAll": "全部",
+        "empty": "暂无 Pipeline 作业记录",
+        "detail": "作业详情",
+        "steps": "步骤进度",
+        "items": "子项列表",
+        "retryStep": "重试步骤 {step}",
+        "retryStepSuccess": "已重试步骤 {step} 失败项",
+        "noItems": "暂无子项",
+        "loadMore": "加载更多",
+        "loading": "加载中...",
+        "progress": "进度",
+        "credits": "积分消耗",
+        "timeline": "时间线",
+        "startedAt": "开始时间",
+        "completedAt": "完成时间",
+        "createdAt": "创建时间"
+      },
+      "action": {
+        "cancel": "取消",
+        "pause": "暂停",
+        "resume": "恢复",
+        "retryFailed": "重试失败项",
+        "confirm": "确认",
+        "close": "关闭"
+      }
+    },
+    "aiGeneration": {
+      "title": "AI 素材生成",
+      "type": {
+        "image": "图片",
+        "video": "视频",
+        "audio": "音频",
+        "text": "文本"
+      },
+      "grid": {
+        "1x1": "1×1 单格",
+        "1x2": "1×2 横排",
+        "2x1": "2×1 竖排",
+        "2x2": "2×2 四宫格",
+        "2x3": "2×3 六宫格",
+        "3x2": "3×2 六宫格",
+        "3x3": "3×3 九宫格",
+        "3x4": "3×4 十二宫格",
+        "4x3": "4×3 十二宫格",
+        "4x4": "4×4 十六宫格"
+      },
+      "status": {
+        "pending": "等待中",
+        "running": "生成中",
+        "succeeded": "成功",
+        "failed": "失败",
+        "cancelled": "已取消"
+      },
+      "provider": {
+        "typeLabel": "生成类型",
+        "modelLabel": "模型选择",
+        "selectModel": "选择模型",
+        "loading": "加载中",
+        "noModels": "暂无可用模型",
+        "creditCost": "{cost} 积分/次",
+        "creditPerUse": "每次生成消耗 {cost} 积分"
+      },
+      "entity": {
+        "locked": "已锁定 - 切换tab不会更新实体",
+        "unlocked": "未锁定 - 切换tab会自动更新实体",
+        "lockToggle": "切换锁定",
+        "clear": "清除实体",
+        "storyboardDesc": "视觉描述",
+        "characterDesc": "外观特征",
+        "sceneDesc": "场景特征",
+        "propDesc": "道具特征",
+        "scriptMode": "剧本素材生成",
+        "scriptModeLabel": "剧本模式",
+        "scriptModeDesc": "生成素材将自动挂载到当前剧本"
+      },
+      "section": {
+        "imageInput": "图片输入",
+        "advancedSettings": "高级设置"
+      },
+      "prompt": {
+        "placeholder": "输入提示词描述你想要生成的{type}...",
+        "placeholderWithEntity": "描述你想为「{name}」生成的{type}...",
+        "generate": "AI生成提示词",
+        "optimize": "优化提示词",
+        "generateTooltip": "AI自动生成适合当前实体的提示词",
+        "optimizeTooltip": "使用AI优化当前提示词",
+        "generating": "咔咔正在生成提示词...",
+        "aiGenerate": "让咔咔帮你描述",
+        "aiOptimize": "让咔咔帮忙优化",
+        "cardTitle": "{type}提示词生成｜优化",
+        "contextBound": "已绑定当前实体：{name}",
+        "contextFlexible": "选择实体上下文、语言和补充要求后，让咔咔生成或优化提示词。",
+        "outputLabel": "Prompt",
+        "outputHint": "这里是最终用于生成{type}的提示词输出区，也可以手动继续编辑。",
+        "providerUnavailable": "当前媒体类型暂无可用的提示词模型。",
+        "requiredField": "请填写{field}",
+        "gridCountRange": "宫格数量必须在 1 到 16 之间",
+        "languageInvalid": "输出语言仅支持 en / zh"
+      },
+      "style": {
+        "label": "风格",
+        "noStyle": "无风格",
+        "selectTooltip": "选择画面风格"
+      },
+      "gridLayout": {
+        "tooltip": "分镜宫格布局"
+      },
+      "action": {
+        "generate": "生成",
+        "cancel": "取消"
+      },
+      "toast": {
+        "taskSubmitted": "生成任务已提交，请在素材列表中查看进度",
+        "taskFailed": "提交生成任务失败",
+        "selectEntity": "请先选择一个实体（角色、场景、道具等）再进行生成",
+        "generationFailed": "生成失败",
+        "promptGenerated": "提示词已生成，已自动锁定实体",
+        "promptOptimized": "提示词已优化，已自动锁定实体",
+        "promptGenerateFailed": "未能生成提示词，请重试",
+        "promptOptimizeFailed": "未能优化提示词，请重试",
+        "promptGenerateError": "提示词生成失败",
+        "promptOptimizeError": "提示词优化失败",
+        "noScriptContext": "未找到剧本上下文，请在剧本中使用此功能"
+      },
+      "error": {
+        "title": "生成失败",
+        "loadProvidersFailed": "加载模型列表失败",
+        "noWorkspace": "工作区未选择",
+        "uploadFailed": "上传失败",
+        "uploadDescription": "AI 生成参考素材"
+      },
+      "generationStatus": {
+        "pending": "准备中...",
+        "running": "生成中...",
+        "succeeded": "已完成",
+        "failed": "失败",
+        "cancelled": "已取消",
+        "timeout": "超时"
+      },
+      "fileUpload": {
+        "image": "图片",
+        "video": "视频",
+        "audio": "音频",
+        "document": "文档",
+        "file": "文件",
+        "clickOrDrag": "点击或拖拽{type}",
+        "dropToAdd": "释放以添加{type}",
+        "addType": "添加{type}",
+        "dropToAddShort": "释放以添加",
+        "asset": "素材",
+        "maxSize": "最大 {size}",
+        "removeFile": "移除文件"
+      },
+      "dynamicForm": {
+        "onePerLine": "(每行一个)",
+        "itemCount": "{count} 项",
+        "loadingOptions": "加载选项中...",
+        "noOptions": "暂无可选项",
+        "selectEntityTypeFirst": "请先选择实体类型",
+        "selectEntity": "选择实体",
+        "storyboardFallback": "分镜 #{sequence}"
+      },
+      "tabs": {
+        "generate": "生成",
+        "tasks": "任务",
+        "batchMode": "批量模式",
+        "noScript": "请在剧本中打开此面板",
+        "empty": "暂无生成任务",
+        "batchRunning": "进行中的批量作业",
+        "batchEmpty": "暂无进行中的批量作业",
+        "batchViewDetail": "查看详情"
+      },
+      "batch": {
+        "title": "批量生成",
+        "close": "退出批量模式",
+        "batchTitle": "作业名称",
+        "batchTitlePlaceholder": "为此批量作业命名（选填）",
+        "typeSelector": {
+          "label": "批量类型"
+        },
+        "scope": {
+          "label": "作用域",
+          "entityType": "实体类型",
+          "selectEpisode": "选择剧集",
+          "currentScript": "当前剧本",
+          "allCharacters": "全部角色",
+          "allScenes": "全部场景",
+          "allProps": "全部道具",
+          "allStoryboards": "全部分镜",
+          "skipExisting": "跳过已有素材的实体",
+          "entityTypes": {
+            "EPISODE": "剧集",
+            "SCRIPT": "剧本",
+            "CHARACTER": "角色",
+            "SCENE": "场景",
+            "PROP": "道具"
+          }
+        },
+        "pipeline": {
+          "label": "流水线模板",
+          "selectTemplate": "选择模板",
+          "stepOverrides": "步骤 Provider 覆盖",
+          "step": "步骤 {number}",
+          "useDefault": "使用默认"
+        },
+        "abTest": {
+          "label": "A/B 测试提供商",
+          "selectProviders": "选择至少 2 个提供商",
+          "minProviders": "请至少选择 2 个提供商"
+        },
+        "advanced": {
+          "label": "高级选项",
+          "concurrency": "并发数",
+          "errorStrategy": "错误策略"
+        },
+        "submit": {
+          "button": "启动批量作业",
+          "estimatedCredits": "预估 {credits} 积分",
+          "submitting": "提交中..."
+        },
+        "toast": {
+          "createSuccess": "批量作业已创建并开始执行",
+          "createFailed": "创建批量作业失败"
+        },
+        "singleEntity": "为「{name}」生成",
+        "noEntityHint": "请先选择实体或切换为范围模式"
+      }
+    },
+    "collab": {
+      "panel": {
+        "title": "评论",
+        "closeAriaLabel": "收起评论面板",
+        "noTarget": "选择一个实体",
+        "noTargetHint": "在角色、分镜、场景或道具列表中点击评论图标",
+        "entityTypes": {
+          "CHARACTER": "角色",
+          "STORYBOARD": "分镜",
+          "SCENE": "场景",
+          "PROP": "道具",
+          "SCRIPT": "剧本",
+          "EPISODE": "剧集"
+        },
+        "filterResolved": "切换已解决评论显示",
+        "hideResolved": "隐藏已解决",
+        "showResolved": "显示已解决",
+        "refresh": "刷新"
+      },
+      "list": {
+        "loading": "加载评论中…",
+        "error": "加载评论失败，请重试",
+        "retry": "重试",
+        "empty": "暂无评论",
+        "emptyHint": "在下方输入框添加第一条评论",
+        "loadMore": "加载更多评论",
+        "hiddenResolved": "已隐藏 {count} 条已解决评论"
+      },
+      "item": {
+        "statusResolved": "已解决",
+        "resolveTooltip": "标记为已解决",
+        "reopenTooltip": "重新打开",
+        "editTooltip": "编辑",
+        "deleteTooltip": "删除",
+        "deleteConfirm": "确定删除这条评论吗？",
+        "cancel": "取消",
+        "save": "保存",
+        "reply": "回复",
+        "cancelReply": "取消回复",
+        "replyPlaceholder": "回复…",
+        "removeReaction": "取消反应",
+        "addReaction": "添加反应",
+        "edited": "已编辑",
+        "time": {
+          "justNow": "刚刚",
+          "minutesAgo": "{min} 分钟前",
+          "hoursAgo": "{hour} 小时前",
+          "daysAgo": "{day} 天前",
+          "monthsAgo": "{month} 个月前",
+          "yearsAgo": "{year} 年前"
+        }
+      },
+      "input": {
+        "defaultPlaceholder": "添加评论… 输入 @ 提及成员",
+        "hint": "@ 提及成员 · # 提及实体 · Ctrl+Enter 发送",
+        "cancel": "取消",
+        "send": "发送",
+        "membersLoading": "加载中…",
+        "membersNotFound": "未找到成员",
+        "entitiesLoading": "加载中…",
+        "entitiesNotFound": "未找到实体",
+        "tabCharacter": "角色",
+        "tabScene": "场景",
+        "tabProp": "道具",
+        "attach": "附加文件"
+      },
+      "notifications": {
+        "title": "通知",
+        "ariaLabel": "通知中心",
+        "markAllRead": "全部标为已读",
+        "empty": "暂无通知"
+      },
+      "fab": {
+        "ariaLabel": "打开评论面板",
+        "tooltip": "评论"
+      },
+      "thread": {
+        "viewAll": "查看全部 {count} 条回复",
+        "collapse": "收起回复",
+        "loading": "加载回复中…",
+        "loadMore": "加载更多回复",
+        "error": "加载回复失败，请重试",
+        "retry": "重试",
+        "empty": "暂无回复"
+      }
+    },
+    "empty": {
+      "title": "欢迎来到工作空间",
+      "description": "当前尚未选择工作空间，请创建或加入一个工作空间以开始使用。"
+    },
+    "errors": {
+      "switchPermissionDenied": "工作空间已切换或无权限，请重新选择工作空间",
+      "switchFailed": "切换工作空间失败"
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "你的创作，从这里开始",
+      "subtitle": "AI 驱动的多 Agent 协同创作平台，从剧本到成片一站搞定。",
+      "getStarted": "开始体验",
+      "skip": "稍后再说"
+    },
+    "profile": {
+      "title": "你的主要角色是？",
+      "subtitle": "这将帮助我们为你定制体验。",
+      "roles": {
+        "director": "导演",
+        "directorDesc": "规划镜头、执导场景、统筹制作",
+        "screenwriter": "编剧",
+        "screenwriterDesc": "撰写剧本、构思故事、打磨对白",
+        "producer": "制片人",
+        "producerDesc": "管理项目、协调团队、统筹后勤",
+        "explorer": "探索者",
+        "explorerDesc": "探索平台、学习功能、自由体验"
+      },
+      "continue": "继续",
+      "back": "返回"
+    },
+    "featureTour": {
+      "slides": {
+        "0": {
+          "label": "AI Agents",
+          "title": "6 位专业 AI Agent",
+          "description": "六位 AI Agent 协同工作 — 从策略、编剧到分镜、剪辑和发布，全流程覆盖。"
+        }
+      },
+      "next": "下一步",
+      "gotIt": "知道了",
+      "skipTour": "跳过导览"
+    },
+    "createWorkspace": {
+      "title": "创建你的剧组",
+      "subtitle": "剧组是你和团队协作的共享空间，所有项目都在这里开展。",
+      "name": "剧组名称",
+      "namePlaceholder": "输入剧组名称",
+      "description": "剧组简介",
+      "descriptionPlaceholder": "简单介绍一下你的剧组（选填）",
+      "create": "创建剧组",
+      "creating": "创建中..."
+    },
+    "createProject": {
+      "title": "准备好开始创作了吗？",
+      "subtitle": "你的 AI 创作团队已就位，创建第一个项目，让 Agent 们为你效力。",
+      "createFirst": "创建第一个项目",
+      "exploreDashboard": "先看看工作台"
+    }
+  },
+  "admin": {
+    "model": {
+      "providerType": {
+        "all": "全部",
+        "TEXT": "文本",
+        "IMAGE": "图片",
+        "VIDEO": "视频",
+        "AUDIO": "音频"
+      }
+    }
+  }
+}

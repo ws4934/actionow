@@ -1,0 +1,467 @@
+# =====================================================
+# Actionow Platform - Offline Image Bundle Deployment
+#
+# Purpose:
+#   Start the full stack on a fresh server from prebuilt Docker images
+#   loaded from a tar archive, without rebuilding application images.
+#
+# Usage:
+#   docker compose -f docker-compose.bundle.yml --env-file .env.bundle --profile full up -d
+# =====================================================
+
+x-common-env: &common-env
+  TZ: ${TZ:-Asia/Shanghai}
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  INTERNAL_AUTH_SECRET: ${INTERNAL_AUTH_SECRET:?INTERNAL_AUTH_SECRET is required}
+  USER_SERVICE_URL: ${USER_SERVICE_URL:-http://user:8081}
+  WORKSPACE_SERVICE_URL: ${WORKSPACE_SERVICE_URL:-http://workspace:8082}
+  WALLET_SERVICE_URL: ${WALLET_SERVICE_URL:-http://wallet:8083}
+  PROJECT_SERVICE_URL: ${PROJECT_SERVICE_URL:-http://project:8084}
+  AI_SERVICE_URL: ${AI_SERVICE_URL:-http://ai:8086}
+  TASK_SERVICE_URL: ${TASK_SERVICE_URL:-http://task:8087}
+  COLLAB_SERVICE_URL: ${COLLAB_SERVICE_URL:-http://collab:8088}
+  SYSTEM_SERVICE_URL: ${SYSTEM_SERVICE_URL:-http://system:8089}
+  CANVAS_SERVICE_URL: ${CANVAS_SERVICE_URL:-http://canvas:8090}
+  AGENT_SERVICE_URL: ${AGENT_SERVICE_URL:-http://agent:8091}
+  BILLING_SERVICE_URL: ${BILLING_SERVICE_URL:-http://billing:8092}
+  COLLAB_WS_URL: ${COLLAB_WS_URL:-ws://collab:8088}
+  CANVAS_WS_URL: ${CANVAS_WS_URL:-ws://canvas:8090}
+  TASK_CALLBACK_BASE_URL: ${TASK_CALLBACK_BASE_URL:-http://task:8087}
+  ACTIONOW_AI_SERVICE_URL: ${ACTIONOW_AI_SERVICE_URL:-http://ai:8086}
+
+x-db-env: &db-env
+  DB_HOST: ${DB_HOST:-postgres}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${DB_NAME:-actionow}
+  DB_USER: ${DB_USER:-actionow}
+  DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+
+x-redis-env: &redis-env
+  REDIS_HOST: ${REDIS_HOST:-redis}
+  REDIS_PORT: ${REDIS_PORT:-6379}
+  REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+
+x-rabbitmq-env: &rabbitmq-env
+  RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+  RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+  RABBITMQ_USER: ${RABBITMQ_USER:-actionow}
+  RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD is required}
+  RABBITMQ_SSL_ENABLED: ${RABBITMQ_SSL_ENABLED:-false}
+
+x-oss-env: &oss-env
+  OSS_TYPE: ${OSS_TYPE:-minio}
+  OSS_DOMAIN: ${OSS_DOMAIN:-}
+  MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://minio:9000}
+  MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-}
+  MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-}
+  MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-actionow-assets}
+  S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
+  S3_REGION: ${S3_REGION:-us-east-1}
+  S3_BUCKET: ${S3_BUCKET:-}
+  S3_TRANSFER_ACCELERATION: ${S3_TRANSFER_ACCELERATION:-false}
+  S3_CLOUDFRONT_DOMAIN: ${S3_CLOUDFRONT_DOMAIN:-}
+  S3_CLOUDFRONT_KEY_PAIR_ID: ${S3_CLOUDFRONT_KEY_PAIR_ID:-}
+  S3_CLOUDFRONT_PRIVATE_KEY_PATH: ${S3_CLOUDFRONT_PRIVATE_KEY_PATH:-}
+  S3_PRESIGNED_EXPIRE: ${S3_PRESIGNED_EXPIRE:-3600}
+  R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:-}
+  R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+  R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+  R2_BUCKET: ${R2_BUCKET:-}
+  R2_PUBLIC_DOMAIN: ${R2_PUBLIC_DOMAIN:-}
+  R2_PRESIGNED_EXPIRE: ${R2_PRESIGNED_EXPIRE:-3600}
+  ALIYUN_ENDPOINT: ${ALIYUN_ENDPOINT:-}
+  ALIYUN_ACCESS_KEY_ID: ${ALIYUN_ACCESS_KEY_ID:-}
+  ALIYUN_ACCESS_KEY_SECRET: ${ALIYUN_ACCESS_KEY_SECRET:-}
+  ALIYUN_BUCKET: ${ALIYUN_BUCKET:-}
+  ALIYUN_INTERNAL_ENDPOINT: ${ALIYUN_INTERNAL_ENDPOINT:-}
+  ALIYUN_PRESIGNED_EXPIRE: ${ALIYUN_PRESIGNED_EXPIRE:-3600}
+  TOS_ENDPOINT: ${TOS_ENDPOINT:-}
+  TOS_ACCESS_KEY_ID: ${TOS_ACCESS_KEY_ID:-}
+  TOS_SECRET_ACCESS_KEY: ${TOS_SECRET_ACCESS_KEY:-}
+  TOS_BUCKET: ${TOS_BUCKET:-}
+  TOS_REGION: ${TOS_REGION:-cn-beijing}
+  TOS_PUBLIC_DOMAIN: ${TOS_PUBLIC_DOMAIN:-}
+  TOS_PRESIGNED_EXPIRE: ${TOS_PRESIGNED_EXPIRE:-3600}
+
+x-jvm-env: &jvm-env
+  JAVA_EXTRA_OPTS: ${JVM_OPTS:--XX:MaxGCPauseMillis=200 -XX:+UseStringDeduplication}
+
+x-service-base: &service-base
+  restart: unless-stopped
+  networks:
+    - actionow-network
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  logging:
+    driver: json-file
+    options:
+      max-size: "50m"
+      max-file: "3"
+
+x-healthcheck-base: &healthcheck-base
+  interval: 30s
+  timeout: 10s
+  retries: 5
+  start_period: 90s
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: actionow-postgres
+    profiles:
+      - infra
+      - full
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-actionow}
+      POSTGRES_USER: ${DB_USER:-actionow}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${POSTGRES_EXPOSE_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-actionow} -d ${DB_NAME:-actionow}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - actionow-network
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+
+  redis:
+    image: redis:7-alpine
+    container_name: actionow-redis
+    profiles:
+      - infra
+      - full
+    restart: unless-stopped
+    command: >-
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${REDIS_EXPOSE_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "--no-auth-warning", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - actionow-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 768m
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: actionow-rabbitmq
+    profiles:
+      - infra
+      - full
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-actionow}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD is required}
+      RABBITMQ_DEFAULT_VHOST: /
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${RABBITMQ_EXPOSE_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - actionow-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512m
+
+  minio:
+    image: minio/minio:latest
+    container_name: actionow-minio
+    profiles:
+      - infra
+      - full
+      - minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-actionow}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - actionow-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512m
+
+  gateway:
+    image: actionow-gateway:${IMAGE_TAG:-latest}
+    container_name: actionow-gateway
+    <<: *service-base
+    profiles: [apps, full]
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    environment:
+      <<: [*common-env, *redis-env, *jvm-env]
+      SERVER_PORT: 8080
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/actuator/health"]
+
+  user:
+    image: actionow-user:${IMAGE_TAG:-latest}
+    container_name: actionow-user
+    <<: *service-base
+    profiles: [apps, full]
+    ports:
+      - "${USER_PORT:-8081}:8081"
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *jvm-env]
+      SERVER_PORT: 8081
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      # OAuth 配置已迁移至 t_system_config，通过 System 管理面板配置
+      MAIL_PROVIDER: ${MAIL_PROVIDER:-resend}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      MAIL_FROM: ${MAIL_FROM:-support@example.com}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://localhost:8081/actuator/health"]
+
+  workspace:
+    image: actionow-workspace:${IMAGE_TAG:-latest}
+    container_name: actionow-workspace
+    <<: *service-base
+    profiles: [apps, full]
+    ports:
+      - "${WORKSPACE_PORT:-8082}:8082"
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *jvm-env]
+      SERVER_PORT: 8082
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://localhost:8082/actuator/health"]
+
+  wallet:
+    image: actionow-wallet:${IMAGE_TAG:-latest}
+    container_name: actionow-wallet
+    <<: *service-base
+    profiles: [apps, full]
+    ports:
+      - "${WALLET_PORT:-8083}:8083"
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *jvm-env]
+      SERVER_PORT: 8083
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://localhost:8083/actuator/health"]
+
+  billing:
+    image: actionow-billing:${IMAGE_TAG:-latest}
+    container_name: actionow-billing
+    <<: *service-base
+    profiles: [apps, full]
+    ports:
+      - "${BILLING_PORT:-8092}:8092"
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *jvm-env]
+      SERVER_PORT: 8092
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL:-http://localhost:5173/billing/success?session_id={CHECKOUT_SESSION_ID}}
+      STRIPE_CANCEL_URL: ${STRIPE_CANCEL_URL:-http://localhost:5173/billing/cancel}
+      BILLING_SUBSCRIPTION_CURRENCY: ${BILLING_SUBSCRIPTION_CURRENCY:-USD}
+      BILLING_POINTS_PER_MAJOR_UNIT: ${BILLING_POINTS_PER_MAJOR_UNIT:-10}
+      BILLING_MINOR_PER_MAJOR_UNIT: ${BILLING_MINOR_PER_MAJOR_UNIT:-100}
+      WECHAT_APP_ID: ${WECHAT_APP_ID:-}
+      WECHAT_MCH_ID: ${WECHAT_MCH_ID:-}
+      WECHAT_API_V3_KEY: ${WECHAT_API_V3_KEY:-}
+      WECHAT_PRIVATE_KEY_PATH: ${WECHAT_PRIVATE_KEY_PATH:-classpath:cert/apiclient_key.pem}
+      WECHAT_MCH_SERIAL_NUMBER: ${WECHAT_MCH_SERIAL_NUMBER:-}
+      WECHAT_NOTIFY_URL: ${WECHAT_NOTIFY_URL:-}
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://localhost:8092/actuator/health"]
+
+  project:
+    image: actionow-project:${IMAGE_TAG:-latest}
+    container_name: actionow-project
+    <<: *service-base
+    profiles: [apps, full]
+    ports:
+      - "${PROJECT_PORT:-8084}:8084"
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *oss-env, *jvm-env]
+      SERVER_PORT: 8084
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://localhost:8084/actuator/health"]
+
+  ai:
+    image: actionow-ai:${IMAGE_TAG:-latest}
+    container_name: actionow-ai
+    <<: *service-base
+    profiles: [apps, full]
+    ports:
+      - "${AI_PORT:-8086}:8086"
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *oss-env, *jvm-env]
+      SERVER_PORT: 8086
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com}
+      STABILITY_API_KEY: ${STABILITY_API_KEY:-}
+      DIFY_BASE_URL: ${DIFY_BASE_URL:-}
+      GROOVY_MAX_EXECUTION_TIME_MS: ${GROOVY_MAX_EXECUTION_TIME_MS:-120000}
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://localhost:8086/actuator/health"]
+
+  task:
+    image: actionow-task:${IMAGE_TAG:-latest}
+    container_name: actionow-task
+    <<: *service-base
+    profiles: [apps, full]
+    ports:
+      - "${TASK_PORT:-8087}:8087"
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *oss-env, *jvm-env]
+      SERVER_PORT: 8087
+      TASK_CALLBACK_BASE_URL: ${TASK_CALLBACK_BASE_URL:-}
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://localhost:8087/actuator/health"]
+
+  collab:
+    image: actionow-collab:${IMAGE_TAG:-latest}
+    container_name: actionow-collab
+    <<: *service-base
+    profiles: [apps, full]
+    ports:
+      - "${COLLAB_PORT:-8088}:8088"
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *jvm-env]
+      SERVER_PORT: 8088
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://localhost:8088/actuator/health"]
+
+  system:
+    image: actionow-system:${IMAGE_TAG:-latest}
+    container_name: actionow-system
+    <<: *service-base
+    profiles: [apps, full]
+    ports:
+      - "${SYSTEM_PORT:-8089}:8089"
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *jvm-env]
+      SERVER_PORT: 8089
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://localhost:8089/actuator/health"]
+
+  canvas:
+    image: actionow-canvas:${IMAGE_TAG:-latest}
+    container_name: actionow-canvas
+    <<: *service-base
+    profiles: [apps, full]
+    ports:
+      - "${CANVAS_PORT:-8090}:8090"
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *jvm-env]
+      SERVER_PORT: 8090
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://localhost:8090/actuator/health"]
+
+  agent:
+    image: actionow-agent:${IMAGE_TAG:-latest}
+    container_name: actionow-agent
+    <<: *service-base
+    profiles: [apps, full]
+    ports:
+      - "${AGENT_PORT:-8091}:8091"
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *rabbitmq-env, *jvm-env]
+      SERVER_PORT: 8091
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-004}
+      SAA_DEFAULT_MODEL: ${SAA_DEFAULT_MODEL:-gemini-3-flash-preview}
+      SAA_MAX_ITERATIONS: ${SAA_MAX_ITERATIONS:-20}
+      RAG_ENABLED: ${RAG_ENABLED:-false}
+      BILLING_IDLE_TIMEOUT: ${BILLING_IDLE_TIMEOUT:-30}
+      BILLING_BATCH_SIZE: ${BILLING_BATCH_SIZE:-50}
+      BILLING_MAX_RETRY: ${BILLING_MAX_RETRY:-3}
+      SESSION_MAX_ACTIVE_PER_SCOPE: ${SESSION_MAX_ACTIVE_PER_SCOPE:-5}
+      SESSION_MAX_ACTIVE_GLOBAL: ${SESSION_MAX_ACTIVE_GLOBAL:-3}
+      SESSION_MAX_TOTAL_PER_USER: ${SESSION_MAX_TOTAL_PER_USER:-200}
+      SESSION_IDLE_ARCHIVE_DAYS: ${SESSION_IDLE_ARCHIVE_DAYS:-30}
+      SESSION_SOFT_DELETE_RETENTION: ${SESSION_SOFT_DELETE_RETENTION:-90}
+      SESSION_BATCH_SIZE: ${SESSION_BATCH_SIZE:-100}
+      BILLING_SETTLE_INTERVAL: ${BILLING_SETTLE_INTERVAL:-300000}
+      BILLING_RETRY_INTERVAL: ${BILLING_RETRY_INTERVAL:-600000}
+      MISSION_MAX_STEPS: ${MISSION_MAX_STEPS:-50}
+      MISSION_MAX_RETRIES: ${MISSION_MAX_RETRIES:-3}
+      MISSION_MAX_CONTEXT_STEPS: ${MISSION_MAX_CONTEXT_STEPS:-10}
+      MISSION_MAX_STEP_SUMMARY_CHARS: ${MISSION_MAX_STEP_SUMMARY_CHARS:-500}
+      MISSION_LOOP_WARN_THRESHOLD: ${MISSION_LOOP_WARN_THRESHOLD:-5}
+      MISSION_LOOP_FAIL_THRESHOLD: ${MISSION_LOOP_FAIL_THRESHOLD:-10}
+      SKILL_PACKAGE_URL: ${SKILL_PACKAGE_URL:-}
+    healthcheck:
+      <<: *healthcheck-base
+      test: ["CMD", "curl", "-sf", "http://localhost:8091/actuator/health"]
+
+volumes:
+  postgres_data:
+    name: actionow_postgres_data
+  redis_data:
+    name: actionow_redis_data
+  rabbitmq_data:
+    name: actionow_rabbitmq_data
+  minio_data:
+    name: actionow_minio_data
+
+networks:
+  actionow-network:
+    name: actionow-network
+    driver: bridge

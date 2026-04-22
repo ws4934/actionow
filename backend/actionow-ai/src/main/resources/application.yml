@@ -1,0 +1,119 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: actionow-ai
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    import:
+      - "classpath:oss-shared.yml"
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            actionow-wallet:
+              - uri: ${WALLET_SERVICE_URL:http://actionow-wallet:8083}
+            actionow-project:
+              - uri: ${PROJECT_SERVICE_URL:http://actionow-project:8084}
+            actionow-task:
+              - uri: ${TASK_SERVICE_URL:http://actionow-task:8087}
+            actionow-system:
+              - uri: ${SYSTEM_SERVICE_URL:http://actionow-system:8089}
+            actionow-workspace:
+              - uri: ${WORKSPACE_SERVICE_URL:http://actionow-workspace:8082}
+
+  # 数据源配置
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:actionow}?currentSchema=public&stringtype=unspecified
+    username: ${DB_USER:actionow}
+    password: ${DB_PASSWORD:actionow123}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      pool-name: ActionowAIHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  # Redis 配置
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+
+  # RabbitMQ 配置
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    ssl:
+      enabled: ${RABBITMQ_SSL_ENABLED:false}
+
+# MyBatis Plus 配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: assign_uuid
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+# Feign 配置
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 5000
+        read-timeout: 30000
+        logger-level: basic
+  circuitbreaker:
+    enabled: true
+
+# DIFY 配置
+dify:
+  url: ${DIFY_BASE_URL:http://localhost:5001}
+
+# Actionow 配置
+actionow:
+  # 内部服务认证（HMAC签名）
+  internal:
+    auth-secret: ${INTERNAL_AUTH_SECRET:actionow-dev-internal-secret-key-32chars}
+    signature-max-age-seconds: 300
+  # Groovy 脚本沙箱配置
+  ai:
+    groovy:
+      sandbox:
+        # 脚本最大执行时间（毫秒）。实际超时由 AiRuntimeConfigService 动态控制（默认 300s，满足大视频上传）
+        max-execution-time-ms: ${GROOVY_MAX_EXECUTION_TIME_MS:300000}
+
+  # OSS 存储配置详见 classpath:oss-shared.yml（由 actionow-common-oss 提供）
+
+# 日志配置
+logging:
+  level:
+    # 生产环境使用 INFO 级别，避免泄露敏感信息
+    # 开发调试时可通过环境变量覆盖: LOG_LEVEL=DEBUG
+    com.actionow: DEBUG
+    io.github.guoshiqiufeng.dify: ${LOG_LEVEL:INFO}
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized

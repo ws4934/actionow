@@ -1,0 +1,286 @@
+package com.actionow.agent.scriptwriting.tools;
+
+import com.actionow.agent.core.scope.ScopeAccessException;
+import com.actionow.agent.core.scope.ScopeValidator;
+import com.actionow.agent.feign.ProjectFeignClient;
+import com.actionow.agent.tool.response.ToolResponse;
+import com.actionow.common.core.result.Result;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.Nullable;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+
+/**
+ * 项目工具抽象基类
+ * 提供通用的验证、响应构建、异常处理方法
+ *
+ * 使用 ToolResponse 统一响应格式，确保 LLM 能够一致地解析工具执行结果
+ *
+ * @author Actionow
+ */
+@Slf4j
+public abstract class AbstractProjectTool {
+
+    protected final ProjectFeignClient projectClient;
+    protected final ScopeValidator scopeValidator;
+
+    protected AbstractProjectTool(ProjectFeignClient projectClient, ScopeValidator scopeValidator) {
+        this.projectClient = projectClient;
+        this.scopeValidator = scopeValidator;
+    }
+
+    protected AbstractProjectTool(ProjectFeignClient projectClient) {
+        this.projectClient = projectClient;
+        this.scopeValidator = null;
+    }
+
+    // ==================== 验证方法 ====================
+
+    /**
+     * 验证必填字符串参数
+     * @return 错误响应，如果验证通过返回 null
+     */
+    @Nullable
+    protected Map<String, Object> validateRequired(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            return ToolResponse.validationError(fieldName).toMap();
+        }
+        return null;
+    }
+
+    /**
+     * 验证必填参数（非空检查）
+     * @return 错误响应，如果验证通过返回 null
+     */
+    @Nullable
+    protected Map<String, Object> validateNotNull(Object value, String fieldName) {
+        if (value == null) {
+            return ToolResponse.validationError(fieldName).toMap();
+        }
+        return null;
+    }
+
+    // ==================== 响应构建方法 ====================
+
+    /**
+     * 构建错误响应
+     */
+    protected Map<String, Object> error(String message) {
+        return ToolResponse.error(message).toMap();
+    }
+
+    /**
+     * 构建错误响应（带错误码）
+     */
+    protected Map<String, Object> error(String errorCode, String message) {
+        return ToolResponse.error(errorCode, message).toMap();
+    }
+
+    /**
+     * 构建成功响应
+     */
+    protected Map<String, Object> success(String key, Object value, String message) {
+        return ToolResponse.success(message, key, value).toMap();
+    }
+
+    /**
+     * 构建成功响应（包含数据）
+     */
+    protected Map<String, Object> success(Map<String, Object> data) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.putAll(data);
+        return response;
+    }
+
+    /**
+     * 构建成功响应（带数据键）
+     */
+    protected Map<String, Object> successData(String key, Object data) {
+        return ToolResponse.successData(key, data).toMap();
+    }
+
+    /**
+     * 构建成功响应（带数据键和计数）
+     */
+    protected Map<String, Object> successList(String key, java.util.List<?> data) {
+        return ToolResponse.successWithCount(key, data, data.size()).toMap();
+    }
+
+    // ==================== Result 处理方法 ====================
+
+    /**
+     * 处理 Feign 返回的 Result 对象
+     * @param result Feign 调用返回的结果
+     * @param action 操作名称（用于错误消息）
+     * @param successHandler 成功时的数据处理器
+     * @return 响应 Map
+     */
+    protected Map<String, Object> handleResult(Result<Map<String, Object>> result, String action,
+                                               java.util.function.Function<Map<String, Object>, Map<String, Object>> successHandler) {
+        if (result.isSuccess()) {
+            return successHandler.apply(result.getData());
+        } else {
+            return ToolResponse.error("FEIGN_ERROR", action + "失败: " + result.getMessage()).toMap();
+        }
+    }
+
+    /**
+     * 处理 Feign 返回的列表 Result 对象
+     */
+    protected Map<String, Object> handleListResult(Result<java.util.List<Map<String, Object>>> result,
+                                                   String action, String dataKey) {
+        if (result.isSuccess()) {
+            return successList(dataKey, result.getData());
+        } else {
+            return ToolResponse.error("FEIGN_ERROR", action + "失败: " + result.getMessage()).toMap();
+        }
+    }
+
+    // ==================== 异常处理方法 ====================
+
+    /**
+     * 统一异常处理并返回错误响应
+     */
+    protected Map<String, Object> handleException(Exception e, String action) {
+        log.error("{} failed", action, e);
+        return ToolResponse.error("EXECUTION_ERROR", action + "异常: " + e.getMessage()).toMap();
+    }
+
+    /**
+     * 处理作用域访问异常
+     */
+    protected Map<String, Object> handleScopeException(ScopeAccessException e) {
+        if (scopeValidator != null) {
+            return scopeValidator.buildScopeErrorResponse(e);
+        }
+        return ToolResponse.permissionError("作用域访问受限: " + e.getMessage()).toMap();
+    }
+
+    // ==================== 执行包装方法 ====================
+
+    /**
+     * 包装执行逻辑，统一处理异常
+     * @param action 操作名称（用于日志和错误消息）
+     * @param execution 执行逻辑
+     * @return 响应 Map
+     */
+    protected Map<String, Object> execute(String action, Supplier<Map<String, Object>> execution) {
+        try {
+            return execution.get();
+        } catch (ScopeAccessException e) {
+            return handleScopeException(e);
+        } catch (Exception e) {
+            return handleException(e, action);
+        }
+    }
+
+    /**
+     * 类型安全的执行包装：内部使用 {@link ToolResponse} 构建结果，
+     * 自动转换为 {@code Map<String, Object>} 以兼容 Spring AI @Tool 返回值。
+     * <p>
+     * 推荐新编写的工具方法使用此重载，以获得编译期类型检查。
+     *
+     * @param action    操作名称
+     * @param execution 返回 ToolResponse 的执行逻辑
+     * @return 响应 Map
+     */
+    protected Map<String, Object> executeTyped(String action, Supplier<ToolResponse> execution) {
+        try {
+            return execution.get().toMap();
+        } catch (ScopeAccessException e) {
+            return handleScopeException(e);
+        } catch (Exception e) {
+            return handleException(e, action);
+        }
+    }
+
+    // ==================== 工具方法 ====================
+
+    /**
+     * 添加可选字段到请求 Map
+     */
+    protected void addIfNotBlank(Map<String, Object> request, String key, String value) {
+        if (value != null && !value.isBlank()) {
+            request.put(key, value);
+        }
+    }
+
+    /**
+     * 添加可选字段到请求 Map（非空对象）
+     */
+    protected void addIfNotNull(Map<String, Object> request, String key, Object value) {
+        if (value != null) {
+            request.put(key, value);
+        }
+    }
+
+    /**
+     * 获取当前脚本ID（从 AgentContext 获取）
+     * @return 脚本ID，如果不在脚本作用域内返回 null
+     */
+    @Nullable
+    protected String getCurrentScriptId() {
+        var ctx = com.actionow.agent.core.scope.AgentContextHolder.getContext();
+        return ctx != null ? ctx.getScriptId() : null;
+    }
+
+    /**
+     * 解析脚本ID：如果未指定则使用当前作用域的脚本ID
+     * @param scriptId 传入的脚本ID
+     * @return 解析后的脚本ID，可能为 null
+     */
+    protected String resolveScriptId(String scriptId) {
+        if (scriptId != null && !scriptId.isBlank()) {
+            return scriptId;
+        }
+        return getCurrentScriptId();
+    }
+
+    /**
+     * 构建版本保存的成功消息
+     */
+    protected String buildVersionMessage(String entityName, String saveMode, Map<String, Object> data) {
+        return switch (saveMode) {
+            case "OVERWRITE" -> entityName + "已覆盖更新";
+            case "NEW_ENTITY" -> "已基于该" + entityName + "创建新实体";
+            default -> entityName + "已存为新版本 V" + data.getOrDefault("versionNumber", "?");
+        };
+    }
+
+    /**
+     * 获取默认保存模式
+     */
+    protected String getDefaultSaveMode(String saveMode) {
+        return (saveMode != null && !saveMode.isBlank()) ? saveMode : "NEW_VERSION";
+    }
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    /**
+     * 解析 JSON 数组字符串为 List<Map<String, Object>>
+     */
+    protected List<Map<String, Object>> parseJsonArray(String json) {
+        try {
+            return OBJECT_MAPPER.readValue(json, new TypeReference<List<Map<String, Object>>>() {});
+        } catch (Exception e) {
+            throw new IllegalArgumentException("JSON 数组解析失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 解析 JSON 对象字符串为 Map<String, Object>
+     */
+    protected Map<String, Object> parseJsonObject(String json) {
+        try {
+            return OBJECT_MAPPER.readValue(json, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            throw new IllegalArgumentException("JSON 对象解析失败: " + e.getMessage(), e);
+        }
+    }
+}

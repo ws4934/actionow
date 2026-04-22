@@ -1,0 +1,131 @@
+# ===========================================
+# Deploy Single Service Workflow
+# ===========================================
+# Manual workflow to deploy a specific service
+# with a specific image tag.
+
+name: Deploy Single Service
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service to deploy'
+        required: true
+        type: choice
+        options:
+          - gateway
+          - user
+          - workspace
+          - wallet
+          - project
+          - ai
+          - task
+          - collab
+          - system
+          - canvas
+          - agent
+      image_tag:
+        description: 'Image tag to deploy (default: latest)'
+        required: false
+        default: 'latest'
+      environment:
+        description: 'Target environment'
+        required: false
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+  ECS_CLUSTER: actionow-${{ github.event.inputs.environment }}
+
+jobs:
+  deploy:
+    name: Deploy ${{ github.event.inputs.service }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to ECS
+        run: |
+          SERVICE=${{ github.event.inputs.service }}
+          IMAGE_TAG=${{ github.event.inputs.image_tag }}
+          IMAGE="${{ env.ECR_REGISTRY }}/actionow/${SERVICE}:${IMAGE_TAG}"
+
+          echo "============================================"
+          echo "Deploying ${SERVICE} with image ${IMAGE}"
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "============================================"
+
+          # Verify image exists
+          aws ecr describe-images \
+            --repository-name actionow/${SERVICE} \
+            --image-ids imageTag=${IMAGE_TAG} \
+            --region ${{ env.AWS_REGION }} || {
+              echo "❌ Image not found: ${IMAGE}"
+              exit 1
+            }
+
+          # Get current task definition
+          TASK_DEF=$(aws ecs describe-task-definition \
+            --task-definition actionow-${SERVICE} \
+            --query 'taskDefinition' \
+            --output json)
+
+          # Update image in task definition
+          NEW_TASK_DEF=$(echo $TASK_DEF | jq \
+            --arg IMAGE "$IMAGE" \
+            '.containerDefinitions[0].image = $IMAGE |
+             del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+
+          # Register new task definition
+          NEW_ARN=$(aws ecs register-task-definition \
+            --cli-input-json "$NEW_TASK_DEF" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          echo "New task definition: $NEW_ARN"
+
+          # Update service
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${SERVICE} \
+            --task-definition ${NEW_ARN} \
+            --force-new-deployment
+
+          # Wait for stability
+          echo "Waiting for service to stabilize..."
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${SERVICE}
+
+          echo "✅ Deployment complete!"
+
+      - name: Get deployment info
+        run: |
+          SERVICE=${{ github.event.inputs.service }}
+
+          echo "============================================"
+          echo "Deployment Summary"
+          echo "============================================"
+
+          aws ecs describe-services \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${SERVICE} \
+            --query 'services[0].{
+              ServiceName: serviceName,
+              DesiredCount: desiredCount,
+              RunningCount: runningCount,
+              TaskDefinition: taskDefinition
+            }'

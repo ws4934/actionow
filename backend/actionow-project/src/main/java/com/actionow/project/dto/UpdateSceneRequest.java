@@ -1,0 +1,74 @@
+package com.actionow.project.dto;
+
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+
+import java.util.Map;
+
+/**
+ * 更新场景请求
+ * 所有字段均为可选，只更新传入的非空字段
+ *
+ * @author Actionow
+ */
+@Data
+public class UpdateSceneRequest {
+
+    /**
+     * 场景名称
+     */
+    @Size(min = 1, max = 100, message = "场景名称长度为1-100个字符")
+    private String name;
+
+    /**
+     * 场景描述
+     */
+    @Size(max = 2000, message = "描述不能超过2000个字符")
+    private String description;
+
+    /**
+     * 固定描述词（AI生成时使用）
+     */
+    @Size(max = 500, message = "固定描述词不能超过500个字符")
+    private String fixedDesc;
+
+    /**
+     * 场景类型: INTERIOR, EXTERIOR, MIXED
+     */
+    private String sceneType;
+
+    /**
+     * 外观数据 (JSON)
+     */
+    private Map<String, Object> appearanceData;
+
+    /**
+     * 封面素材ID
+     */
+    private String coverAssetId;
+
+    /**
+     * 扩展信息 (JSON)
+     */
+    private Map<String, Object> extraInfo;
+
+    /**
+     * 外观数据增量补丁 (JSON)
+     * 与现有 appearanceData 做 merge（putAll），不会覆盖未传字段
+     */
+    private Map<String, Object> appearanceDataPatch;
+
+    /**
+     * 扩展信息增量补丁 (JSON)
+     * 与现有 extraInfo 做 merge（putAll），不会覆盖未传字段
+     */
+    private Map<String, Object> extraInfoPatch;
+
+    /**
+     * 保存模式
+     * OVERWRITE - 覆盖当前版本
+     * NEW_VERSION - 存为新版本（默认）
+     * NEW_ENTITY - 另存为新实体
+     */
+    private String saveMode;
+}
