@@ -48,7 +48,7 @@ Actionow targets the full pipeline of screenwriting, storyboard collaboration, a
 
 The platform organizes every creative action around the content graph **Script → Episode → Scene → Storyboard → Character / Prop / Style / Asset**. Every entity is versioned and lineage-tracked; every interaction is observable, replayable, and reusable by agents.
 
-| Audience                       | Value proposition                                                                                                  |
+| Audience                       |                                                                                                                     |
 |--------------------------------|---------------------------------------------------------------------------------------------------------------------|
 | Film, ad, and animation teams  | Connect writers, art, and production through agents; turn storyboards and assets into reusable inventory.           |
 | AIGC studios                   | Wrap multimodal model capabilities as Skills and compose them per character or scene.                               |
@@ -60,8 +60,6 @@ The platform organizes every creative action around the content graph **Script �
 ## Demo
 
 Live: **[actionow.ai](https://actionow.ai)**
-
-Place demo videos and screenshots into [`assets/demo/`](assets/demo/PLACEHOLDERS.md); use the file names below as placeholders.
 
 <div align="center">
 
@@ -237,6 +235,7 @@ cd actionow
 ./actionow.sh init        # interactive wizard for docker/.env.prod
 ./actionow.sh up          # build images and bring up the full production stack
 ./actionow.sh status      # container status
+./actionow.sh backend rebuild xxx # rebuild a backend module, e.g. ./actionow.sh backend rebuild ai
 ```
 
 Endpoints:
